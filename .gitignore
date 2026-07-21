@@ -47,3 +47,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Uploaded assets (large files, not needed in repo)
+attached_assets/
