@@ -34,6 +34,7 @@ workflows:
         BUNDLE_ID: com.mydigitalpets.app
         TEAM_ID: 2A78MFVCJS
         PROFILE_NAME: My Digital Pets AppStore
+        APP_STORE_CONNECT_KEY_IDENTIFIER: V936CR85XU
 
     scripts:
       - name: Install pnpm and dependencies
