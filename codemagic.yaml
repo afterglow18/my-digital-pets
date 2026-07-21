@@ -18,6 +18,8 @@ workflows:
         bundle_identifier: com.mydigitalpets.app
       xcode: latest
       node: 22
+      groups:
+        - secrets
       vars:
         XCODE_SCHEME: App
         XCODE_PROJECT: artifacts/outfit-generator/ios/App/App.xcodeproj
