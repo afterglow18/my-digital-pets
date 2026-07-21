@@ -4,10 +4,10 @@
 
 | Field | Value |
 |---|---|
-| **App Name** | My Digital Closet |
+| **App Name** | My Digital Pets |
 | **Subtitle** (30 chars max) | Style your wardrobe with AI |
-| **Bundle ID** | com.mydigitalcloset.app |
-| **SKU** | MYDIGITALCLOSET001 |
+| **Bundle ID** | com.mydigitalpets.app |
+| **SKU** | MYDIGITALPETS001 |
 | **Primary Category** | Lifestyle |
 | **Secondary Category** | Shopping |
 | **Content Rating** | 4+ |
@@ -106,11 +106,11 @@ Key points to cover:
 
 | Field | Value |
 |---|---|
-| **Reference Name** | My Digital Closet Premium |
-| **Product ID** | com.mydigitalcloset.app.premium |
+| **Reference Name** | My Digital Pets Premium |
+| **Product ID** | com.mydigitalpets.app.premium |
 | **Type** | Non-Consumable |
 | **Price** | $4.99 (Tier 5) |
-| **Display Name** | My Digital Closet Premium |
+| **Display Name** | My Digital Pets Premium |
 | **Description** | Unlimited wardrobe items and saved outfits. One-time purchase — no subscription. |
 
 ---
