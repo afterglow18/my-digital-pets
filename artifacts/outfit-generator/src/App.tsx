@@ -22,7 +22,7 @@ try {
 }
 
 // ── First-launch welcome ──────────────────────────────────────────────────────
-const ENTERED_KEY = "garage-entered";
+const ENTERED_KEY = "pets-entered";
 
 function hasEntered(): boolean {
   try {

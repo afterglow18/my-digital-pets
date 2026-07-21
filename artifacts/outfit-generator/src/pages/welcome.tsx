@@ -1,9 +1,9 @@
 /**
- * WelcomePage — Brown garage splash screen.
+ * WelcomePage — Brown pets splash screen.
  *
- * IDLE     : large brown garage, closed. Title + button below.
+ * IDLE     : large brown pets, closed. Title + button below.
  * OPENING  : lid rotates open (3-D perspective flip), warm inner glow.
- * REVEALING: briefcase-bg.png scales up from garage to fill the whole screen.
+ * REVEALING: briefcase-bg.png scales up from pets to fill the whole screen.
  * EXITING  : full-screen image fades out → onEnter().
  */
 
@@ -29,7 +29,7 @@ export default function WelcomePage({ onEnter }: Props) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Garage is ~80 % of viewport width, capped for tablets
+  // Pets is ~80 % of viewport width, capped for tablets
   const SW  = Math.min(vw * 0.80, 360);
   const SH  = SW * 0.68;          // classic briefcase ratio ≈ 3 : 2
   const LH  = SH * 0.44;          // lid is top 44 %
@@ -78,7 +78,7 @@ export default function WelcomePage({ onEnter }: Props) {
 
       {/* ── Full-screen briefcase image — scales up from centre when revealing ── */}
       <motion.img
-        src="/garage-packed-bg.jpg"
+        src="/pets-packed-bg.jpg"
         alt=""
         draggable={false}
         style={{
@@ -98,7 +98,7 @@ export default function WelcomePage({ onEnter }: Props) {
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       />
 
-      {/* ── Main content (garage + text + button) ── */}
+      {/* ── Main content (pets + text + button) ── */}
       <motion.div
         style={{
           position: "relative", zIndex: 4,
@@ -119,7 +119,7 @@ export default function WelcomePage({ onEnter }: Props) {
           boxShadow: "inset 0 2px 5px rgba(0,0,0,0.4)",
         }} />
 
-        {/* Garage shell */}
+        {/* Pets shell */}
         <div style={{
           width: SW, height: SH,
           position: "relative",
@@ -265,7 +265,7 @@ export default function WelcomePage({ onEnter }: Props) {
             lineHeight: 1.1,
             color: "#E8D4B0",
           }}>
-            MY DIGITAL<br />GARAGE
+            MY DIGITAL<br />PETS
           </div>
           <div style={{
             marginTop: 9,
@@ -303,7 +303,7 @@ export default function WelcomePage({ onEnter }: Props) {
             pointerEvents: phase === "idle" ? "auto" : "none",
           }}
         >
-          Open Garage ✨
+          Open Pets ✨
         </motion.button>
       </motion.div>
 

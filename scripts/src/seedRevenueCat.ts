@@ -38,9 +38,9 @@ import {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const PROJECT_NAME        = "My Digital Garage";
-const APP_STORE_APP_NAME  = "My Digital Garage";
-const APP_STORE_BUNDLE_ID = "com.mydigitalgarage.app";
+const PROJECT_NAME        = "My Digital Pets";
+const APP_STORE_APP_NAME  = "My Digital Pets";
+const APP_STORE_BUNDLE_ID = "com.mydigitalpets.app";
 
 const ENTITLEMENT_IDENTIFIER = "premium";
 const ENTITLEMENT_DISPLAY_NAME = "Premium Access";
@@ -61,8 +61,8 @@ interface ProductDef {
 
 const PRODUCTS: ProductDef[] = [
   {
-    identifier:  "digital_garage_monthly",
-    displayName: "Monthly – My Digital Garage",
+    identifier:  "digital_pets_monthly",
+    displayName: "Monthly – My Digital Pets",
     type:        "subscription",
     duration:    "P1M",
     priceMicros: 1990000,   // $1.99
@@ -70,8 +70,8 @@ const PRODUCTS: ProductDef[] = [
     pkgName:     "Monthly",
   },
   {
-    identifier:  "digital_garage_yearly",
-    displayName: "Yearly – My Digital Garage",
+    identifier:  "digital_pets_yearly",
+    displayName: "Yearly – My Digital Pets",
     type:        "subscription",
     duration:    "P1Y",
     priceMicros: 19990000,  // $19.99
@@ -79,8 +79,8 @@ const PRODUCTS: ProductDef[] = [
     pkgName:     "Yearly",
   },
   {
-    identifier:  "digital_garage_lifetime",
-    displayName: "Lifetime – My Digital Garage",
+    identifier:  "digital_pets_lifetime",
+    displayName: "Lifetime – My Digital Pets",
     type:        "non_consumable",
     priceMicros: 9990000,   // $9.99
     pkgKey:      "$rc_lifetime",

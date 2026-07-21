@@ -4,7 +4,7 @@
  * Layout (top to bottom):
  *   1. MY PLAN      — current plan badge, upgrade CTA, restore link
  *   2. BACKUP & RESTORE — export/import with warning text
- *   3. MY DIGITAL GARAGE — app version + tagline
+ *   3. MY DIGITAL PETS — app version + tagline
  */
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -162,7 +162,7 @@ export default function AccountPage() {
       {/* Page title */}
       <header className="mb-5">
         <h1 className="font-display font-bold text-4xl uppercase tracking-tighter leading-none">
-          My Digital<br />Garage
+          My Digital<br />Pets
         </h1>
       </header>
 
@@ -271,7 +271,7 @@ export default function AccountPage() {
         {/* ── 3. BACKUP & RESTORE ─────────────────────────────────────────── */}
         <Card emoji="💾" title="Backup & Restore">
           <p className="text-sm text-black/60 leading-snug">
-            Export your garage to a file. Save it to iCloud Drive or Files to
+            Export your pets to a file. Save it to iCloud Drive or Files to
             keep it safe across phone upgrades.
           </p>
 
@@ -284,7 +284,7 @@ export default function AccountPage() {
 
           {/* Warning */}
           <p className="text-sm font-bold leading-snug" style={{ color: "#C0390B" }}>
-            ⚠️ Deleting the app removes all your garage data.
+            ⚠️ Deleting the app removes all your pets data.
             Export a backup first to keep it safe.
           </p>
 
@@ -296,17 +296,17 @@ export default function AccountPage() {
           />
 
           <p className="text-xs text-black/40 text-center leading-snug">
-            Importing replaces your current garage with the backup.
+            Importing replaces your current pets with the backup.
           </p>
         </Card>
 
         {/* ── 3. APP INFO ─────────────────────────────────────────────────── */}
-        <Card emoji="🧳" title="My Digital Garage">
+        <Card emoji="🧳" title="My Digital Pets">
           <p className="text-sm text-black/55 leading-snug">
             Version 1.0.0
           </p>
           <p className="text-sm text-black/55 leading-snug">
-            Your garage stays on your device, works offline, and can be
+            Your pets stays on your device, works offline, and can be
             backed up with iCloud.
           </p>
         </Card>
