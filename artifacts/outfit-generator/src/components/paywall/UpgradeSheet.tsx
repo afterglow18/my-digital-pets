@@ -121,8 +121,15 @@ function TierCard({
 
 // ── Sheet ─────────────────────────────────────────────────────────────────────
 
+const PRIVACY_URL = "https://app.notion.com/p/My-Digital-Collection-Privacy-Policy-39682db6065380b19dedcb108d4a0ef4?source=copy_link";
+const TERMS_URL   = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+
+function openUrl(url: string) {
+  window.open(url, "_system");
+}
+
 export function UpgradeSheet({ reason, onClose }: Props) {
-  const { offerings, purchase } = useSubscription();
+  const { offerings, purchase, restore, isRestoring } = useSubscription();
   const [selected, setSelected] = useState<TierId>("lifetime");
   const [status,   setStatus]   = useState<"idle" | "pending">("idle");
 
@@ -137,6 +144,10 @@ export function UpgradeSheet({ reason, onClose }: Props) {
     : selected === "lifetime"   ? `UNLOCK FOREVER – ${prices.lifetime} ›`
     : selected === "yearly"     ? `SUBSCRIBE – ${prices.yearly}/YR ›`
     :                             `SUBSCRIBE – ${prices.monthly}/MO ›`;
+
+  const handleRestore = useCallback(async () => {
+    try { await restore(); onClose(); } catch { /* user cancelled */ }
+  }, [restore, onClose]);
 
   const handlePurchase = useCallback(async () => {
     if (status === "pending") return;
@@ -251,12 +262,40 @@ export function UpgradeSheet({ reason, onClose }: Props) {
         >
           {ctaLabel}
         </button>
-        <button
-          onClick={onClose}
-          className="text-sm font-semibold text-black/35 text-center hover:text-black/55 transition-colors"
-        >
-          Maybe Later
-        </button>
+
+        {/* Secondary actions */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={onClose}
+            className="text-sm font-semibold text-black/35 text-center hover:text-black/55 transition-colors"
+          >
+            Maybe Later
+          </button>
+          <button
+            onClick={handleRestore}
+            disabled={isRestoring}
+            className="text-sm font-semibold text-black/35 hover:text-black/55 transition-colors disabled:opacity-50"
+          >
+            {isRestoring ? "Restoring…" : "Restore Purchases"}
+          </button>
+        </div>
+
+        {/* Legal links */}
+        <p className="text-center text-[10px] text-black/30 leading-relaxed">
+          <button
+            onClick={() => openUrl(TERMS_URL)}
+            className="underline hover:text-black/50 transition-colors"
+          >
+            Terms of Use
+          </button>
+          {" · "}
+          <button
+            onClick={() => openUrl(PRIVACY_URL)}
+            className="underline hover:text-black/50 transition-colors"
+          >
+            Privacy Policy
+          </button>
+        </p>
       </div>
     </motion.div>
   );
