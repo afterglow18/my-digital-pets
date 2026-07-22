@@ -153,7 +153,11 @@ export function UpgradeSheet({ reason, onClose }: Props) {
     if (status === "pending") return;
     setStatus("pending");
     const pkg = getRcPackage(offerings, TIER_DEFAULTS[selected].pkgId);
-    if (!pkg) { setStatus("idle"); return; }
+    if (!pkg) {
+      setStatus("idle");
+      alert("Purchases unavailable right now. Please restore or try again later.");
+      return;
+    }
     try {
       await purchase(pkg);
       onClose();
