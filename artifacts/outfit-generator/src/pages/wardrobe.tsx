@@ -54,6 +54,19 @@ const IMG_W = 1024;
 const IMG_H = 1536;
 const NAV_H = 90;
 
+/** Returns 0 on iPad/tablet (no bottom nav) and NAV_H on mobile/desktop. */
+function useNavH() {
+  const [navH, setNavH] = React.useState(() =>
+    typeof window !== "undefined" && window.innerWidth >= 768 ? 0 : NAV_H
+  );
+  React.useEffect(() => {
+    const update = () => setNavH(window.innerWidth >= 768 ? 0 : NAV_H);
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return navH;
+}
+
 // ── Landmark fractions (calibrated for pets-open-bg.jpg 989×1536) ─────────
 // Real-photo pets, shot from above.
 // Lid interior:  y ≈ 0.05 → 0.38   (rows 1 & 2)
@@ -105,6 +118,7 @@ const pY = (ir: ImgRect, f: number) => ir.top    + ir.height * f;
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function WardrobePage() {
+  const effectiveNavH = useNavH();
   const containerRef = useRef<HTMLDivElement>(null!);
   const ir = useImageRect(containerRef);
 
@@ -207,7 +221,7 @@ export default function WardrobePage() {
       style={{
         position: "relative",
         width: "100%",
-        height: `calc(100dvh - ${NAV_H}px)`,
+        height: `calc(100dvh - ${effectiveNavH}px)`,
         overflow: "hidden",
         background: "#C8B9A2",
       }}

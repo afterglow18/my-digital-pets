@@ -26,6 +26,19 @@ import { useQueryClient } from "@tanstack/react-query";
 const IMG_W = 1024;
 const IMG_H = 1536;
 const NAV_H = 90;
+
+/** Returns 0 on iPad/tablet (no bottom nav) and NAV_H on mobile/desktop. */
+function useNavH() {
+  const [navH, setNavH] = React.useState(() =>
+    typeof window !== "undefined" && window.innerWidth >= 768 ? 0 : NAV_H
+  );
+  React.useEffect(() => {
+    const update = () => setNavH(window.innerWidth >= 768 ? 0 : NAV_H);
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return navH;
+}
 const PINK  = "#E8D4B0";
 
 const LM = {
@@ -85,6 +98,7 @@ const MIN_SPIN_MS = 1600;
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function GeneratePage() {
+  const effectiveNavH = useNavH();
   const containerRef = useRef<HTMLDivElement>(null!);
   const ir    = useImageRect(containerRef);
   const ready = ir.width > 0;
@@ -238,7 +252,7 @@ export default function GeneratePage() {
       style={{
         position: "relative",
         width: "100%",
-        height: `calc(100dvh - ${NAV_H}px)`,
+        height: `calc(100dvh - ${effectiveNavH}px)`,
         overflow: "hidden",
         background: "#C8B9A2",
       }}

@@ -21,7 +21,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     : undefined;
 
   const navItems = [
-    { href: "/",         label: "Suitcase", icon: Shirt,    badge: wardrobeCount },
+    { href: "/",         label: "Pets",     icon: Shirt,    badge: wardrobeCount },
     { href: "/generate", label: "Generate", icon: Sparkles  },
     { href: "/saved",    label: "Saved",    icon: Bookmark  },
     { href: "/account",  label: "Settings", icon: Settings  },
@@ -29,17 +29,68 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="min-h-[100dvh] w-full bg-[#f8f9fa] flex justify-center lg:py-8 lg:px-4">
-      {/* Phone Frame Constraint for Desktop */}
-      <div className="w-full max-w-md bg-background h-[100dvh] lg:min-h-[850px] lg:h-[850px] lg:border-[6px] lg:border-black lg:rounded-[3rem] lg:shadow-2xl relative overflow-hidden flex flex-col lg:overflow-y-auto">
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto pb-[90px] relative">
+      {/* ── iPad sidebar nav: visible on md, hidden on mobile and desktop phone-frame ── */}
+      <nav className="hidden md:flex lg:hidden fixed inset-y-0 left-0 w-[72px] flex-col items-center pt-12 pb-8 gap-1 bg-white border-r-[3px] border-black z-40">
+        {navItems.map((item) => {
+          const isActive = location === item.href;
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center gap-1 group w-full px-2 py-1.5"
+            >
+              <div
+                className={cn(
+                  "p-2.5 rounded-xl border-2 transition-all duration-200 w-full flex items-center justify-center relative",
+                  isActive
+                    ? "bg-primary border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                    : "bg-transparent border-transparent group-hover:bg-muted group-active:scale-95"
+                )}
+              >
+                <Icon
+                  className={cn("w-5 h-5", isActive ? "text-black" : "text-muted-foreground")}
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
+                {item.badge !== undefined && item.badge > 0 && (
+                  <div className="absolute -top-1.5 -right-1.5 bg-secondary text-black text-[9px] font-bold border-2 border-black w-4 h-4 flex items-center justify-center rounded-full">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </div>
+                )}
+              </div>
+              <span
+                className={cn(
+                  "text-[9px] font-bold uppercase tracking-wider transition-colors",
+                  isActive ? "text-black" : "text-muted-foreground"
+                )}
+              >
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* ── Main container ── */}
+      <div
+        className={cn(
+          // Mobile: constrained phone layout
+          "w-full max-w-md bg-background h-[100dvh] relative overflow-hidden flex flex-col",
+          // iPad: full-width, offset by sidebar
+          "md:max-w-none md:ml-[72px]",
+          // Desktop: phone frame, cancel iPad offset
+          "lg:max-w-md lg:ml-0 lg:min-h-[850px] lg:h-[850px] lg:border-[6px] lg:border-black lg:rounded-[3rem] lg:shadow-2xl lg:overflow-y-auto"
+        )}
+      >
+        {/* Main content — no bottom padding on iPad (sidebar replaces bottom nav) */}
+        <main className="flex-1 overflow-y-auto pb-[90px] md:pb-0 lg:pb-[90px] relative">
           {children}
         </main>
 
-        {/* Bottom Navigation */}
-        <nav className="absolute bottom-0 left-0 right-0 bg-white border-t-[3px] border-black p-3 pb-safe z-[40]">
-          <ul className="flex items-center justify-around">
+        {/* Bottom nav — mobile + desktop phone-frame only, hidden on iPad */}
+        <nav className="flex md:hidden lg:flex absolute bottom-0 left-0 right-0 bg-white border-t-[3px] border-black p-3 pb-safe z-[40]">
+          <ul className="flex items-center justify-around w-full">
             {navItems.map((item) => {
               const isActive = location === item.href;
               const Icon = item.icon;
@@ -62,8 +113,6 @@ export function AppLayout({ children }: AppLayoutProps) {
                         )}
                         strokeWidth={isActive ? 2.5 : 2}
                       />
-
-                      {/* Badge */}
                       {item.badge !== undefined && item.badge > 0 && (
                         <div className="absolute -top-2 -right-2 bg-secondary text-black text-[10px] font-bold border-2 border-black w-5 h-5 flex items-center justify-center rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                           {item.badge > 99 ? "99+" : item.badge}
