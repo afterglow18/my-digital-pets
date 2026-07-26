@@ -3,11 +3,12 @@
  * Every field is optional and editable. A "Save" button appears only when
  * the form is dirty. Delete is always available.
  */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Heart, Trash2, Save, ChevronDown,
+  X, Heart, Trash2, Save, ChevronDown, Sparkles, Loader2,
 } from "lucide-react";
+import { removeBackground, blobToDataUrl } from "@/lib/backgroundRemoval";
 import {
   type ClothingItem,
   type ClothingItemUpdateCategory,
@@ -150,15 +151,56 @@ function isDirty(form: FormState, item: ClothingItem): boolean {
 export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetProps) {
   const [form, setForm]           = useState<FormState | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [bgRemoving, setBgRemoving] = useState(false);
+  const [bgError,    setBgError]    = useState<string | null>(null);
+  // Prevents stale async result from writing if item changes mid-removal
+  const bgItemIdRef = useRef<number | null>(null);
 
   const updateItem  = useUpdateClothingItem();
   const deleteItem  = useDeleteClothingItem();
   const queryClient = useQueryClient();
 
-  // Reset form whenever item changes
+  const handleRemoveBg = useCallback(async () => {
+    if (!item?.imageObjectPath || bgRemoving) return;
+    setBgError(null);
+    setBgRemoving(true);
+    bgItemIdRef.current = item.id;
+    try {
+      const resultUrl  = await removeBackground(item.imageObjectPath);
+      if (bgItemIdRef.current !== item.id) return; // item changed mid-flight
+      const resultBlob = await fetch(resultUrl).then((r) => r.blob());
+      if (bgItemIdRef.current !== item.id) return;
+      const dataUrl    = await blobToDataUrl(resultBlob);
+      if (bgItemIdRef.current !== item.id) return;
+      await new Promise<void>((resolve, reject) => {
+        updateItem.mutate(
+          { id: item.id, data: { imageObjectPath: dataUrl } },
+          {
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
+              queryClient.invalidateQueries({ queryKey: getListOutfitsQueryKey() });
+              queryClient.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
+              resolve();
+            },
+            onError: reject,
+          },
+        );
+      });
+    } catch (err) {
+      if (bgItemIdRef.current !== item.id) return;
+      setBgError("Background removal failed. Please try again.");
+      console.warn("BG removal failed:", err);
+    } finally {
+      if (bgItemIdRef.current === item.id) setBgRemoving(false);
+    }
+  }, [item, bgRemoving, updateItem, queryClient]);
+
+  // Reset form and bg state whenever item changes
   useEffect(() => {
     if (item) setForm(toForm(item));
     setShowDeleteConfirm(false);
+    setBgRemoving(false);
+    setBgError(null);
   }, [item?.id]);
 
   if (!item || !form) return null;
@@ -272,18 +314,51 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
       {/* ── Photo ── */}
       {item.imageObjectPath && (
-        <div
-          className="w-full h-52 flex-shrink-0 border-b-2 border-black"
-          style={{
-            backgroundImage: "repeating-conic-gradient(#e5e7eb 0% 25%, white 0% 50%)",
-            backgroundSize: "16px 16px",
-          }}
-        >
-          <img
-            src={getImageUrl(item.imageObjectPath)!}
-            alt={item.name}
-            className="w-full h-full object-contain"
-          />
+        <div className="flex-shrink-0 border-b-2 border-black">
+          <div
+            className="w-full h-52"
+            style={{
+              backgroundImage: "repeating-conic-gradient(#e5e7eb 0% 25%, white 0% 50%)",
+              backgroundSize: "16px 16px",
+            }}
+          >
+            <img
+              src={getImageUrl(item.imageObjectPath)!}
+              alt={item.name}
+              className="w-full h-full object-contain"
+            />
+          </div>
+
+          {/* Remove background button */}
+          <div className="px-4 py-2 flex flex-col gap-1">
+            {bgError && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 text-center">
+                {bgError}
+              </p>
+            )}
+            <button
+              onClick={handleRemoveBg}
+              disabled={bgRemoving}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl
+                         border-2 border-black bg-white font-display font-bold text-sm uppercase tracking-tight
+                         shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
+                         active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                         disabled:translate-x-0 disabled:translate-y-0"
+            >
+              {bgRemoving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Removing background… (this takes a moment)
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Remove Background ✨
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
@@ -382,7 +457,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                        hover:border-red-500 hover:text-red-600 transition-all"
           >
             <Trash2 className="w-4 h-4" />
-            Delete from Suitcase Forever
+            Delete Forever
           </button>
         ) : (
           <div className="flex gap-2">

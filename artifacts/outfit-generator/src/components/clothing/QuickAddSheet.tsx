@@ -221,11 +221,57 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
     }
   }, [selected, cleanedBlob, originalBlob, handleClose, category, existingCount, createItem, queryClient, onCreated]);
 
+  // ── Batch upload (multi-file, no preview) ────────────────────────────────
+
+  const handleBatch = useCallback(async (files: File[]) => {
+    setErrorMsg(null);
+    setPhase("uploading");
+    let failed = 0;
+    for (let i = 0; i < files.length; i++) {
+      try {
+        const jpeg    = await encodeForUpload(files[i]);
+        const dataUrl = await blobToDataUrl(jpeg);
+        const label   = CATEGORY_LABELS[category];
+        const n       = existingCount + i;
+        const name    = n === 0 ? label : `${label} ${n + 1}`;
+        await new Promise<void>((resolve, reject) => {
+          createItem.mutate(
+            { data: { name, category, imageObjectPath: dataUrl } },
+            {
+              onSuccess: (created) => {
+                queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
+                if (onCreated) onCreated(created);
+                resolve();
+              },
+              onError: reject,
+            },
+          );
+        });
+      } catch {
+        failed++;
+      }
+    }
+    if (failed > 0) {
+      setErrorMsg(`${failed} photo${failed > 1 ? "s" : ""} could not be saved. Please try again.`);
+      setPhase("pick");
+    } else {
+      handleClose();
+    }
+  }, [category, existingCount, createItem, queryClient, onCreated, handleClose]);
+
   // ── Input handler ─────────────────────────────────────────────────────────
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) { e.target.value = ""; return; }
+    // Single photo → preview + bg-removal flow
+    // Multiple photos → fast batch upload (preview doesn't scale to 10 shots)
+    if (files.length === 1) {
+      handleFile(files[0]);
+    } else {
+      handleBatch(files);
+    }
     e.target.value = "";
   };
 
@@ -514,11 +560,12 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
         className="hidden"
         onChange={handleInputChange}
       />
-      {/* Gallery — opens photo library / file picker (single select for preview flow) */}
+      {/* Gallery — opens photo library / file picker (multiple OK; single → preview, batch → direct upload) */}
       <input
         ref={galleryInputRef}
         type="file"
         accept="image/*"
+        multiple
         className="hidden"
         onChange={handleInputChange}
       />
