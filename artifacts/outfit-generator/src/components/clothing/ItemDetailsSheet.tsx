@@ -206,6 +206,10 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     const chosenUrl = selected === "cleaned" && cleanedUrl ? cleanedUrl : srcUrl;
     if (!chosenUrl) return;
 
+    // Cancel any in-flight removal — user has made their choice
+    bgGenRef.current += 1;
+    setBgProcessing(false);
+
     // Update on screen immediately — no flash waiting for the DB
     setDisplayImageUrl(chosenUrl);
     setCompareOpen(false);
