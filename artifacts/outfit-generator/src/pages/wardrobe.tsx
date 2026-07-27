@@ -76,7 +76,7 @@ const LM = {
   rows: [
     { sectionTop: 0.265, shelfY: 0.395, btnCY: 0.330, carouselTop: 0.210 },  // PET DETAILS (shelf 1)
     { sectionTop: 0.400, shelfY: 0.565, btnCY: 0.483, carouselTop: 0.432 },  // HEALTH      (shelf 2)
-    { sectionTop: 0.570, shelfY: 0.730, btnCY: 0.650, carouselTop: 0.602 },  // CARE        (shelf 3)
+    { sectionTop: 0.570, shelfY: 0.730, btnCY: 0.650, carouselTop: 0.628 },  // CARE        (shelf 3)
     { sectionTop: 0.735, shelfY: 0.895, btnCY: 0.815, carouselTop: 0.795 },  // RECORDS     (shelf 4)
   ],
 
@@ -276,7 +276,7 @@ export default function WardrobePage() {
             const btnCY   = pY(ir, lm.btnCY);
             const btnH    = Math.max(32, pH(ir, 0.045));
 
-            const labelOffsets = [-0.068, 0.020, 0.044, 0.048];
+            const labelOffsets = [-0.068, 0.020, 0.050, 0.048];
             const labelY = pY(ir, lm.sectionTop + labelOffsets[rowIdx]);
 
             return (
