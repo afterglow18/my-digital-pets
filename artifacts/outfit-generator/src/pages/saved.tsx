@@ -22,10 +22,10 @@ const SLOT_ORDER = ["outfits", "beauty", "toiletries", "essentials"] as const;
 type SlotKey = (typeof SLOT_ORDER)[number];
 
 const SLOT_LABELS: Record<SlotKey, string> = {
-  outfits:    "Outfits",
-  beauty:     "Beauty",
-  toiletries: "Toiletries",
-  essentials: "Essentials",
+  outfits:    "Pet Details",
+  beauty:     "Health",
+  toiletries: "Care",
+  essentials: "Records",
 };
 
 function ItemPhoto({
@@ -196,7 +196,7 @@ export default function SavedPage() {
           </p>
           <p className="text-xs text-black/60 mt-1 mb-3 leading-snug">
             You've saved {FREE_OUTFIT_LIMIT} looks — the free limit.
-            Unlock Forever to save unlimited cases.
+            Unlock Forever to save unlimited pets.
           </p>
           <button
             onClick={() => setShowUpgrade(true)}
@@ -356,7 +356,7 @@ export default function SavedPage() {
 
                   {/* 5 fixed extra slots */}
                   <div className="mt-3 pt-3 border-t border-black/10">
-                    <p className="text-[8px] font-bold uppercase tracking-widest text-black/30 mb-2">Extras</p>
+                    <p className="text-[8px] font-bold uppercase tracking-widest text-black/30 mb-2">More</p>
                     <div className="grid grid-cols-5 gap-1.5">
                       {Array.from({ length: 10 }).map((_, i) => {
                         const item = extras[i];
@@ -402,7 +402,7 @@ export default function SavedPage() {
                 {/* Footer: item count */}
                 <div className="px-3 pb-3">
                   <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wide">
-                    {outfit.items?.length ?? 0} product{(outfit.items?.length ?? 0) !== 1 ? "s" : ""}
+                    {outfit.items?.length ?? 0} pet{(outfit.items?.length ?? 0) !== 1 ? "s" : ""}
                   </span>
                 </div>
               </motion.div>

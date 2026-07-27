@@ -447,19 +447,19 @@ export default function WardrobePage() {
               {saveSuccess ? (
                 <div style={{ textAlign: "center", padding: "12px 0" }}>
                   <div style={{ fontSize: 32, marginBottom: 8 }}>💕</div>
-                  <p style={{ fontWeight: 800, fontSize: 16, fontFamily: "var(--font-display)" }}>Case saved!</p>
+                  <p style={{ fontWeight: 800, fontSize: 16, fontFamily: "var(--font-display)" }}>Pet saved!</p>
                 </div>
               ) : (
                 <>
                   <p style={{ fontWeight: 800, fontSize: 15, fontFamily: "var(--font-display)", marginBottom: 12 }}>
-                    Name this case
+                    Name this pet
                   </p>
                   <input
                     autoFocus
                     value={saveName}
                     onChange={e => setSaveName(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && saveName.trim() && handleSave()}
-                    placeholder="e.g. Sunday Glow ✨"
+                    placeholder="e.g. Buddy 🐾"
                     style={{
                       width: "100%", height: 42, borderRadius: 10,
                       border: "2px solid #000", padding: "0 12px",
