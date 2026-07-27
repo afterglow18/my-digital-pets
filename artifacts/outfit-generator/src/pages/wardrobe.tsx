@@ -209,8 +209,8 @@ export default function WardrobePage() {
     ? LM.rows.map(lm => pH(ir, lm.shelfY - lm.carouselTop))
     : LM.rows.map(() => 0);
 
-  // Use the smallest row height so all carousels show photos at the same size
-  const uniformPhotoH = Math.max(0, Math.min(...sectionHeights) - 4);
+  // Each row uses its own full height so photos fill the shelf top-to-bottom
+  const rowPhotoH = sectionHeights.map(h => Math.max(0, h - 4));
 
   return (
     <div
@@ -331,7 +331,7 @@ export default function WardrobePage() {
                       items={items}
                       onCenteredItem={setCentredHandlers[key]}
                       onItemTap={handleItemTap}
-                      maxPhotoH={uniformPhotoH}
+                      maxPhotoH={rowPhotoH[rowIdx]}
                     />
                   </div>
                 )}
