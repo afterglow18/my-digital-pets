@@ -499,7 +499,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
               </button>
               <button
                 onClick={handleSave}
-                disabled={bgProcessing}
+                disabled={selected === "cleaned" && !cleanedUrl}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3
                            border-4 border-black rounded-xl bg-primary font-display font-bold text-sm uppercase
                            shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
@@ -508,7 +508,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
                            disabled:translate-x-0 disabled:translate-y-0"
               >
                 <Check className="w-4 h-4" strokeWidth={3} />
-                {bgProcessing ? "Processing…" : "Save to Closet"}
+                {selected === "cleaned" && !cleanedUrl ? "Processing…" : "Save to Closet"}
               </button>
             </div>
           </div>
