@@ -238,6 +238,10 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
   const dirty = isDirty(form, item);
 
+  // Cleaned photos are stored as PNG data URLs; originals are JPEG.
+  // Hide the Clean Up button once the photo has already been cleaned.
+  const isAlreadyCleaned = (displayImageUrl ?? "").startsWith("data:image/png");
+
   const patch = (key: keyof FormState) => (value: string | boolean) =>
     setForm((prev) => prev ? { ...prev, [key]: value } : prev);
 
@@ -370,8 +374,8 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               />
             </div>
 
-            {/* Clean Up Photo button */}
-            <div className="px-4 py-2">
+            {/* Clean Up Photo button — hidden once photo has been cleaned */}
+            {!isAlreadyCleaned && <div className="px-4 py-2">
               <button
                 onClick={handleCleanUpPhoto}
                 disabled={bgProcessing && !compareOpen}
@@ -394,7 +398,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                   </>
                 )}
               </button>
-            </div>
+            </div>}
           </div>
         )}
 
