@@ -301,7 +301,7 @@ export default function AccountPage() {
         </Card>
 
         {/* ── 3. APP INFO ─────────────────────────────────────────────────── */}
-        <Card emoji="🧳" title="My Digital Pets">
+        <Card emoji="🐾" title="My Digital Pets">
           <p className="text-sm text-black/55 leading-snug">
             Version 1.0.0
           </p>
