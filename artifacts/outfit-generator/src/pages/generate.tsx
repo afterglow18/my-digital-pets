@@ -259,7 +259,7 @@ export default function GeneratePage() {
     >
       {/* ── Background image — object-fit:cover avoids WebKit negative-left clipping bug ── */}
       <img
-        src="/pets-open-bg.jpg"
+        src="/shelf-bg.png"
         alt="My Digital Pets"
         style={{
           position: "absolute",
