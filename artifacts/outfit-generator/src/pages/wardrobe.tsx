@@ -77,7 +77,7 @@ const LM = {
     { sectionTop: 0.265, shelfY: 0.395, btnCY: 0.330, carouselTop: 0.225 },  // PET DETAILS (shelf 1)
     { sectionTop: 0.400, shelfY: 0.575, btnCY: 0.483, carouselTop: 0.435 },  // HEALTH      (shelf 2)
     { sectionTop: 0.570, shelfY: 0.755, btnCY: 0.650, carouselTop: 0.640 },  // CARE        (shelf 3)
-    { sectionTop: 0.735, shelfY: 0.910, btnCY: 0.815, carouselTop: 0.796 },  // RECORDS     (shelf 4)
+    { sectionTop: 0.735, shelfY: 0.910, btnCY: 0.815, carouselTop: 0.804 },  // RECORDS     (shelf 4)
   ],
 
   saveAreaY: 0.916,
