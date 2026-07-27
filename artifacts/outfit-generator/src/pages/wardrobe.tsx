@@ -74,10 +74,10 @@ const LM = {
   doorR: 0.940,  // inner right wall of shelf unit
 
   rows: [
-    { sectionTop: 0.265, shelfY: 0.395, btnCY: 0.330 },  // PET DETAILS (shelf 1)
-    { sectionTop: 0.400, shelfY: 0.565, btnCY: 0.483 },  // HEALTH      (shelf 2)
-    { sectionTop: 0.570, shelfY: 0.730, btnCY: 0.650 },  // CARE        (shelf 3)
-    { sectionTop: 0.735, shelfY: 0.895, btnCY: 0.815 },  // RECORDS     (shelf 4)
+    { sectionTop: 0.265, shelfY: 0.395, btnCY: 0.330, carouselTop: 0.210 },  // PET DETAILS (shelf 1)
+    { sectionTop: 0.400, shelfY: 0.565, btnCY: 0.483, carouselTop: 0.432 },  // HEALTH      (shelf 2)
+    { sectionTop: 0.570, shelfY: 0.730, btnCY: 0.650, carouselTop: 0.602 },  // CARE        (shelf 3)
+    { sectionTop: 0.735, shelfY: 0.895, btnCY: 0.815, carouselTop: 0.795 },  // RECORDS     (shelf 4)
   ],
 
   saveAreaY: 0.916,
@@ -206,7 +206,7 @@ export default function WardrobePage() {
 
   // ── Section layout helpers ────────────────────────────────────────────────
   const sectionHeights = ready
-    ? LM.rows.map(lm => pH(ir, lm.shelfY - lm.sectionTop))
+    ? LM.rows.map(lm => pH(ir, lm.shelfY - lm.carouselTop))
     : LM.rows.map(() => 0);
 
   // Use the smallest row height so all carousels show photos at the same size
@@ -267,8 +267,8 @@ export default function WardrobePage() {
             const lm      = LM.rows[rowIdx];
             const items   = rowData[key];
 
-            const secTop  = pY(ir, lm.sectionTop);
-            const secH    = pH(ir, lm.shelfY - lm.sectionTop);
+            const secTop  = pY(ir, lm.carouselTop);
+            const secH    = pH(ir, lm.shelfY - lm.carouselTop);
             const carLeft = pX(ir, LM.doorL);
             const carW    = pW(ir, LM.doorR - LM.doorL);
 
