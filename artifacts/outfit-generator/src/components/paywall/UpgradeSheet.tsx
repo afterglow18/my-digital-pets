@@ -209,7 +209,7 @@ export function UpgradeSheet({ reason, onClose }: Props) {
           <div className="px-4 py-4 flex flex-col gap-2">
             <p className="font-display font-bold uppercase text-[1.45rem] leading-[0.92] tracking-tight"
                style={{ color: "hsl(35 55% 82%)" }}>
-              Unlimited packed petss
+              Unlimited pets
             </p>
             <p className="font-display font-bold uppercase text-[1.45rem] leading-[0.92] tracking-tight"
                style={{ color: "hsl(35 55% 82%)" }}>
