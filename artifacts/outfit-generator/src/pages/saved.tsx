@@ -416,7 +416,7 @@ export default function SavedPage() {
           </div>
           <h3 className="font-display font-bold text-xl mb-2">No looks saved yet.</h3>
           <p className="text-sm font-medium text-muted-foreground">
-            Head to the Pets tab and save the cases you love.
+            Head to the Pets tab and save the pets you love.
           </p>
         </div>
       )}
