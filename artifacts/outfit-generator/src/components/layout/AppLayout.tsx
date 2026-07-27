@@ -1,6 +1,18 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Shirt, Bookmark, Settings } from "lucide-react";
+import { Bookmark, Settings } from "lucide-react";
+
+function PawPrint({ className, strokeWidth = 2 }: { className?: string; strokeWidth?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <ellipse cx="6"  cy="7.5" rx="1.8" ry="2.4" />
+      <ellipse cx="10.5" cy="5.5" rx="1.8" ry="2.4" />
+      <ellipse cx="15" cy="5.5" rx="1.8" ry="2.4" />
+      <ellipse cx="19" cy="7.5" rx="1.8" ry="2.4" />
+      <path d="M12 21c-4 0-7-2.5-7-6 0-2 1.5-3.5 3-4.5 1-.7 2.5-1.5 4-1.5s3 .8 4 1.5c1.5 1 3 2.5 3 4.5 0 3.5-3 6-7 6z" />
+    </svg>
+  );
+}
 import { cn } from "@/lib/utils";
 import { useGetWardrobeStats } from "@/hooks/useLocalDB";
 
@@ -21,7 +33,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     : undefined;
 
   const navItems = [
-    { href: "/",        label: "Pets",     icon: Shirt,    badge: wardrobeCount },
+    { href: "/",        label: "Pets",     icon: PawPrint, badge: wardrobeCount },
     { href: "/saved",   label: "Saved",    icon: Bookmark  },
     { href: "/account", label: "Settings", icon: Settings  },
   ];
