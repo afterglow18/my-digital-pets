@@ -276,7 +276,7 @@ export default function WardrobePage() {
             const btnCY   = pY(ir, lm.btnCY);
             const btnH    = Math.max(32, pH(ir, 0.045));
 
-            const labelOffsets = [-0.068, 0.020, 0.020, 0.056];
+            const labelOffsets = [-0.068, 0.020, 0.020, 0.048];
             const labelY = pY(ir, lm.sectionTop + labelOffsets[rowIdx]);
 
             return (
