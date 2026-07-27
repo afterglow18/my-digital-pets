@@ -42,11 +42,11 @@ import { FREE_ITEM_LIMIT } from "@/lib/entitlements";
 type RowKey   = "outfits" | "beauty" | "toiletries" | "essentials";
 type Category = "outfits" | "beauty" | "toiletries" | "essentials";
 
-const ROWS: { key: RowKey; btnLabel: string }[] = [
-  { key: "outfits",    btnLabel: "+ ADD OUTFITS"    },
-  { key: "beauty",     btnLabel: "+ ADD BEAUTY"     },
-  { key: "toiletries", btnLabel: "+ ADD TOILETRIES" },
-  { key: "essentials", btnLabel: "+ ADD ESSENTIALS" },
+const ROWS: { key: RowKey; label: string; btnLabel: string }[] = [
+  { key: "outfits",    label: "Pet Details", btnLabel: "+ ADD PET DETAILS" },
+  { key: "beauty",     label: "Health",      btnLabel: "+ ADD HEALTH"      },
+  { key: "toiletries", label: "Care",        btnLabel: "+ ADD CARE"        },
+  { key: "essentials", label: "Records",     btnLabel: "+ ADD RECORDS"     },
 ];
 
 // ── Image constants ───────────────────────────────────────────────────────────
@@ -67,23 +67,20 @@ function useNavH() {
   return navH;
 }
 
-// ── Landmark fractions (calibrated for pets-open-bg.jpg 989×1536) ─────────
-// Real-photo pets, shot from above.
-// Lid interior:  y ≈ 0.05 → 0.38   (rows 1 & 2)
-// Main body:     y ≈ 0.42 → 0.80   (rows 3 & 4)
-// doorL/doorR:   left/right inner walls of the pets interior
+// ── Landmark fractions (calibrated for shelf-bg.png) ──────────────────────
+// Bookcase unit: arch header (0–0.27), four shelves, bottom bar (0.90–1.0)
 const LM = {
-  doorL: 0.182,  // inner left wall
-  doorR: 0.776,  // inner right wall
+  doorL: 0.060,  // inner left wall of shelf unit
+  doorR: 0.940,  // inner right wall of shelf unit
 
   rows: [
-    { sectionTop: 0.170, shelfY: 0.265, btnCY: 0.150 },  // OUTFITS  (lid, upper)
-    { sectionTop: 0.305, shelfY: 0.400, btnCY: 0.285 },  // BEAUTY   (lid, lower)
-    { sectionTop: 0.505, shelfY: 0.618, btnCY: 0.485 },  // TOILETRIES (body, upper)
-    { sectionTop: 0.660, shelfY: 0.770, btnCY: 0.640 },  // ESSENTIALS (body, lower)
+    { sectionTop: 0.265, shelfY: 0.395, btnCY: 0.330 },  // PET DETAILS (shelf 1)
+    { sectionTop: 0.400, shelfY: 0.565, btnCY: 0.483 },  // HEALTH      (shelf 2)
+    { sectionTop: 0.570, shelfY: 0.730, btnCY: 0.650 },  // CARE        (shelf 3)
+    { sectionTop: 0.735, shelfY: 0.895, btnCY: 0.815 },  // RECORDS     (shelf 4)
   ],
 
-  saveAreaY: 0.84,
+  saveAreaY: 0.916,
 } as const;
 
 // ── useImageRect ─────────────────────────────────────────────────────────────
@@ -245,32 +242,7 @@ export default function WardrobePage() {
 
       {ready && (
         <>
-          {/* ── Page title ── */}
-          <div style={{
-            position: "absolute",
-            top: pY(ir, 0.090),
-            left: 8,
-            right: 8,
-            zIndex: 25,
-            textAlign: "center",
-            pointerEvents: "none",
-            overflow: "hidden",
-          }}>
-            <div style={{
-              fontFamily: "var(--font-display, serif)",
-              fontWeight: 900,
-              fontSize: Math.max(8, Math.min(pW(ir, 0.030), ir.containerW * 0.040)),
-              letterSpacing: "0.08em",
-              whiteSpace: "nowrap",
-              textTransform: "uppercase",
-              color: "#1a0800",
-              lineHeight: 1.1,
-            }}>
-              MY DIGITAL PETS
-            </div>
-          </div>
-
-          {/* ── Item-count badge (free tier) ── */}
+          {/* ── Item-count badge (free tier) — overlays the arch badge area ── */}
           {itemsLeft !== null && (
             <button
               onClick={() => setUpgradeReason("items")}
@@ -278,7 +250,7 @@ export default function WardrobePage() {
               aria-label={`${totalItems} of ${FREE_ITEM_LIMIT} items used — tap to upgrade`}
               style={{
                 position: "absolute",
-                top: pY(ir, 0.108), left: "50%", transform: "translateX(-50%)",
+                top: pY(ir, 0.232), left: "50%", transform: "translateX(-50%)",
                 zIndex: 25,
                 padding: "3px 14px", borderRadius: 20, border: "none",
                 background: totalItems >= FREE_ITEM_LIMIT
@@ -298,7 +270,7 @@ export default function WardrobePage() {
           )}
 
           {/* ── 4 shelf rows ── */}
-          {ROWS.map(({ key, btnLabel }, rowIdx) => {
+          {ROWS.map(({ key, label, btnLabel }, rowIdx) => {
             const lm      = LM.rows[rowIdx];
             const items   = rowData[key];
 
@@ -342,7 +314,7 @@ export default function WardrobePage() {
                     fontFamily: "var(--font-display)",
                     textTransform: "uppercase",
                   }}>
-                    {btnLabel}
+                    {label}
                   </span>
                 </button>
 
@@ -397,17 +369,17 @@ export default function WardrobePage() {
           })}
 
 
-          {/* ── Person icon tap zone ── */}
+          {/* ── Paw icon tap zone (bottom-left) — navigate to saved looks ── */}
           <button
             onClick={() => navigate("/favorites")}
             data-testid="button-person-icon"
             aria-label="View saved looks"
             style={{
               position: "absolute",
-              top:    pY(ir, 0.895),
-              left:   pX(ir, 0.115),
-              width:  pW(ir, 0.170),
-              height: pH(ir, 0.080),
+              top:    pY(ir, 0.910),
+              left:   pX(ir, 0.060),
+              width:  pW(ir, 0.200),
+              height: pH(ir, 0.078),
               zIndex: 25,
               background: "transparent",
               border: "none",
@@ -415,16 +387,16 @@ export default function WardrobePage() {
             }}
           />
 
-          {/* ── Lipstick icon tap zone — opens premium upgrade sheet ── */}
+          {/* ── Bone icon tap zone (bottom-right) — opens premium upgrade ── */}
           <button
             onClick={() => setUpgradeReason("items")}
             aria-label="Upgrade to premium"
             style={{
               position: "absolute",
-              top:    pY(ir, 0.905),
-              left:   pX(ir, 0.755),
-              width:  pW(ir, 0.110),
-              height: pH(ir, 0.065),
+              top:    pY(ir, 0.910),
+              left:   pX(ir, 0.740),
+              width:  pW(ir, 0.200),
+              height: pH(ir, 0.078),
               zIndex: 25,
               background: "transparent",
               border: "none",
@@ -432,34 +404,23 @@ export default function WardrobePage() {
             }}
           />
 
-          {/* ── SAVE circular button — covers the baked-in circle ── */}
+          {/* ── SAVE PET tap zone — transparent, covers baked-in pill button ── */}
           <button
             onClick={() => { setSaveName(""); setIsSaveOpen(true); }}
             aria-label="Save current case"
             style={{
               position: "absolute",
-              top:    pY(ir, 0.9466) - pW(ir, 0.074),
-              left:   pX(ir, 0.500)  - pW(ir, 0.074),
-              width:  pW(ir, 0.148),
-              height: pW(ir, 0.148),
-              borderRadius: "50%",
+              top:    pY(ir, 0.916),
+              left:   pX(ir, 0.270),
+              width:  pW(ir, 0.460),
+              height: pH(ir, 0.054),
+              borderRadius: 28,
               zIndex: 26,
-              background: "linear-gradient(160deg, #E8D4B0 0%, #B8894E 100%)",
-              border: "2px solid #B8894E",
-              boxShadow: "0 2px 8px rgba(120,80,40,0.25)",
+              background: "transparent",
+              border: "none",
               cursor: "pointer",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 0,
-              lineHeight: 1.15,
-              padding: 0,
             }}
-          >
-            <span style={{ fontSize: pW(ir, 0.022), fontWeight: 900, color: "#3A2210", letterSpacing: "0.06em", fontFamily: "var(--font-display)" }}>SAVE</span>
-            <span style={{ fontSize: pW(ir, 0.019), fontWeight: 800, color: "#3A2210", letterSpacing: "0.04em", fontFamily: "var(--font-display)" }}>CASE 🤎</span>
-          </button>
+          />
         </>
       )}
 

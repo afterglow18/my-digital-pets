@@ -3,7 +3,6 @@ import { Route, Switch, Redirect, Router as WouterRouter } from 'wouter';
 import { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from './components/layout/AppLayout';
 import WardrobePage from './pages/wardrobe';
-import GeneratePage from './pages/generate';
 import SavedPage from './pages/saved';
 import FavoritesPage from './pages/favorites';
 import AccountPage from './pages/account';
@@ -45,7 +44,6 @@ function Router() {
     <AppLayout>
       <Switch>
         <Route path="/"         component={WardrobePage}  />
-        <Route path="/generate" component={GeneratePage}  />
         <Route path="/saved"    component={SavedPage}     />
         <Route path="/favorites" component={FavoritesPage} />
         <Route path="/account"  component={AccountPage}   />

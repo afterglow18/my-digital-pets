@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Shirt, Sparkles, Bookmark, Settings } from "lucide-react";
+import { Shirt, Bookmark, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetWardrobeStats } from "@/hooks/useLocalDB";
 
@@ -21,10 +21,9 @@ export function AppLayout({ children }: AppLayoutProps) {
     : undefined;
 
   const navItems = [
-    { href: "/",         label: "Pets",     icon: Shirt,    badge: wardrobeCount },
-    { href: "/generate", label: "Generate", icon: Sparkles  },
-    { href: "/saved",    label: "Saved",    icon: Bookmark  },
-    { href: "/account",  label: "Settings", icon: Settings  },
+    { href: "/",        label: "Pets",     icon: Shirt,    badge: wardrobeCount },
+    { href: "/saved",   label: "Saved",    icon: Bookmark  },
+    { href: "/account", label: "Settings", icon: Settings  },
   ];
 
   return (
@@ -109,7 +108,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                         className={cn(
                           "w-6 h-6",
                           isActive ? "text-black" : "text-muted-foreground",
-                          item.href === "/generate" && isActive ? "animate-pulse" : ""
+                          ""
                         )}
                         strokeWidth={isActive ? 2.5 : 2}
                       />
