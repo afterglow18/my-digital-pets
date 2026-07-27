@@ -165,17 +165,11 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     bgGenRef.current += 1;
   }, [item?.id]);
 
-  if (!item || !form) return null;
-
-  const dirty = isDirty(form, item);
-
-  const patch = (key: keyof FormState) => (value: string | boolean) =>
-    setForm((prev) => prev ? { ...prev, [key]: value } : prev);
-
   // ── "Clean Up Photo" — opens compare sheet immediately, runs model in bg ──
+  // All useCallback hooks must be declared before any early return (Rules of Hooks).
 
   const handleCleanUpPhoto = useCallback(async () => {
-    const srcUrl = displayImageUrl ?? item.imageObjectPath;
+    const srcUrl = displayImageUrl ?? item?.imageObjectPath;
     if (!srcUrl || bgProcessing) return;
 
     const myGen = ++bgGenRef.current;
@@ -197,14 +191,14 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     } finally {
       if (bgGenRef.current === myGen) setBgProcessing(false);
     }
-  }, [displayImageUrl, item.imageObjectPath, bgProcessing]);
+  }, [displayImageUrl, item?.imageObjectPath, bgProcessing]);
 
   // ── Confirm selection — optimistic update then background DB write ─────────
 
   const handleConfirm = useCallback(() => {
-    const srcUrl    = displayImageUrl ?? item.imageObjectPath;
+    const srcUrl    = displayImageUrl ?? item?.imageObjectPath;
     const chosenUrl = selected === "cleaned" && cleanedUrl ? cleanedUrl : srcUrl;
-    if (!chosenUrl) return;
+    if (!chosenUrl || !item) return;
 
     // Cancel any in-flight removal — user has made their choice
     bgGenRef.current += 1;
@@ -237,6 +231,15 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     setBgProcessing(false);
     setCompareOpen(false);
   }, []);
+
+  // ── Early return after all hooks ──────────────────────────────────────────
+
+  if (!item || !form) return null;
+
+  const dirty = isDirty(form, item);
+
+  const patch = (key: keyof FormState) => (value: string | boolean) =>
+    setForm((prev) => prev ? { ...prev, [key]: value } : prev);
 
   // ── Form save ─────────────────────────────────────────────────────────────
 
