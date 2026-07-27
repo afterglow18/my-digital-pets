@@ -73,10 +73,10 @@ async function encodeForUpload(input: File | Blob): Promise<Blob> {
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const PHOTO_TIPS = [
-  "Photograph individual products or bundle multiple items together.",
-  "Lay everything flat on a plain background.",
-  "Take the photo from directly above.",
-  "Keep all items fully in frame.",
+  "Photograph one pet, item, or document at a time.",
+  "Use good lighting for a clear image.",
+  "Keep all important details visible.",
+  "Keep the entire pet, item, or document in frame.",
 ] as const;
 
 
