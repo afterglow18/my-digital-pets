@@ -76,7 +76,7 @@ const LM = {
   rows: [
     { sectionTop: 0.265, shelfY: 0.395, btnCY: 0.330, carouselTop: 0.225 },  // PET DETAILS (shelf 1)
     { sectionTop: 0.400, shelfY: 0.565, btnCY: 0.483, carouselTop: 0.447 },  // HEALTH      (shelf 2)
-    { sectionTop: 0.570, shelfY: 0.730, btnCY: 0.650, carouselTop: 0.643 },  // CARE        (shelf 3)
+    { sectionTop: 0.570, shelfY: 0.740, btnCY: 0.650, carouselTop: 0.632 },  // CARE        (shelf 3)
     { sectionTop: 0.735, shelfY: 0.895, btnCY: 0.815, carouselTop: 0.810 },  // RECORDS     (shelf 4)
   ],
 
