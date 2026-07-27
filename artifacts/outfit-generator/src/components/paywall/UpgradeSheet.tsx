@@ -25,9 +25,9 @@ interface Props {
 // ── Copy ──────────────────────────────────────────────────────────────────────
 
 const FEATURES = [
-  "Unlimited clothing items",
-  "Unlimited saved outfits",
-  "Save your entire wardrobe",
+  "Unlimited pets",
+  "Unlimited saved pets",
+  "Save every pet's details",
   "One-time payment options",
   "Choose monthly, yearly or lifetime!",
 ] as const;
@@ -39,8 +39,8 @@ const HEADLINES: Record<UpgradeReason, string> = {
 };
 
 const SUBTITLES: Record<UpgradeReason, string> = {
-  items:     "You've reached the free 20 item limit.\nUpgrade once, pack everything.",
-  outfits:   "You've hit the free outfit limit. Upgrade to save every look.",
+  items:     "You've reached the free 20 pet limit.\nUpgrade once, keep every pet.",
+  outfits:   "You've hit the free saved pet limit. Upgrade to save them all.",
   mannequin: "A premium feature — unlock it once.",
 };
 
@@ -213,10 +213,10 @@ export function UpgradeSheet({ reason, onClose }: Props) {
             </p>
             <p className="font-display font-bold uppercase text-[1.45rem] leading-[0.92] tracking-tight"
                style={{ color: "hsl(35 55% 82%)" }}>
-              Unlimited saved outfits
+              Unlimited saved pets
             </p>
             <p className="text-white/60 text-xs font-medium mt-1 leading-snug">
-              Your entire wardrobe, beautifully packed — forever.
+              Every pet, every detail — remembered forever.
             </p>
           </div>
         </div>
