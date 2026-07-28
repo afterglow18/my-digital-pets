@@ -48,16 +48,16 @@ const IDLE_PAWS: Paw[] = [
 /** Top-half trail — appears after the button is tapped */
 const WALK_PAWS: Paw[] = [
   { x: 44, y: 50, rot:  -2, flip: false, delay: 0.00 },
-  { x: 50, y: 46, rot:   2, flip: true,  delay: 0.18 },
-  { x: 45, y: 42, rot:  -1, flip: false, delay: 0.36 },
-  { x: 49, y: 38, rot:   1, flip: true,  delay: 0.54 },
-  { x: 46, y: 34, rot:  -1, flip: false, delay: 0.72 },
-  { x: 48, y: 30, rot:   1, flip: true,  delay: 0.90 },
-  { x: 47, y: 26, rot:   0, flip: false, delay: 1.08 },
-  { x: 48, y: 22, rot:   0, flip: true,  delay: 1.24 },
-  { x: 47, y: 18, rot:   0, flip: false, delay: 1.40 },
-  { x: 48, y: 14, rot:   0, flip: true,  delay: 1.56 },
-  { x: 47, y: 10, rot:   0, flip: false, delay: 1.72 },
+  { x: 50, y: 46, rot:   2, flip: true,  delay: 0.10 },
+  { x: 45, y: 42, rot:  -1, flip: false, delay: 0.20 },
+  { x: 49, y: 38, rot:   1, flip: true,  delay: 0.30 },
+  { x: 46, y: 34, rot:  -1, flip: false, delay: 0.40 },
+  { x: 48, y: 30, rot:   1, flip: true,  delay: 0.50 },
+  { x: 47, y: 26, rot:   0, flip: false, delay: 0.60 },
+  { x: 48, y: 22, rot:   0, flip: true,  delay: 0.70 },
+  { x: 47, y: 18, rot:   0, flip: false, delay: 0.80 },
+  { x: 48, y: 14, rot:   0, flip: true,  delay: 0.90 },
+  { x: 47, y: 10, rot:   0, flip: false, delay: 1.00 },
 ];
 
 // Last WALK_PAW finishes at delay 1.72 + 0.28 ≈ 2.0 s after tap
@@ -96,9 +96,9 @@ export default function WelcomePage({ onEnter }: Props) {
   const handleEnter = useCallback(() => {
     if (phase !== "idle") return;
     setPhase("walking");
-    setTimeout(() => setPhase("hero"),    2100);
-    setTimeout(() => setPhase("exiting"), 3400);
-    setTimeout(onEnter,                   4200);
+    setTimeout(() => setPhase("hero"),    1400);
+    setTimeout(() => setPhase("exiting"), 4400);
+    setTimeout(onEnter,                   5200);
   }, [phase, onEnter]);
 
   const showWalk   = phase === "walking" || phase === "hero" || phase === "exiting";
