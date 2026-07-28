@@ -323,7 +323,7 @@ export default function WardrobePage() {
                       left:   carLeft,
                       width:  carW,
                       height: secH,
-                      zIndex: 10,
+                      zIndex: 30,
                       overflow: "visible",
                     }}
                   >
