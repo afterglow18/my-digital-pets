@@ -368,7 +368,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
           <div className="flex-shrink-0 border-b-2 border-black">
             {/* Image with checkerboard to reveal transparency on cleaned PNGs */}
             <div
-              className="w-full h-52"
+              className="w-full h-36"
               style={{
                 backgroundImage: "repeating-conic-gradient(#e5e7eb 0% 25%, white 0% 50%)",
                 backgroundSize: "16px 16px",

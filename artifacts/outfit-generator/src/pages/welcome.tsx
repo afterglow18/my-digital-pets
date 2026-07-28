@@ -93,8 +93,8 @@ export default function WelcomePage({ onEnter }: Props) {
     if (phase !== "idle") return;
     setPhase("walking");
     setTimeout(() => setPhase("hero"),    1100);
-    setTimeout(() => setPhase("exiting"), 3600);
-    setTimeout(onEnter,                   4400);
+    setTimeout(() => setPhase("exiting"), 2400);
+    setTimeout(onEnter,                   3200);
   }, [phase, onEnter]);
 
   const showWalk   = phase === "walking" || phase === "hero" || phase === "exiting";
