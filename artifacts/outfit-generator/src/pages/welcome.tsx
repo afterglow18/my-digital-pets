@@ -35,9 +35,10 @@ export default function WelcomePage({ onEnter }: Props) {
         draggable={false}
         style={{
           position: "absolute",
-          inset: 0,
+          top: "env(safe-area-inset-top)",
+          bottom: 0, left: 0, right: 0,
           width: "100%",
-          height: "100%",
+          height: "calc(100% - env(safe-area-inset-top))",
           objectFit: "cover",
           objectPosition: "top center",
           userSelect: "none",
