@@ -33,31 +33,22 @@ type Paw = { x: number; y: number; rot: number; flip: boolean; delay: number };
 
 /** Bottom-half trail — appears on mount, settles around the middle */
 const IDLE_PAWS: Paw[] = [
-  { x: 46, y: 90, rot: -10, flip: false, delay: 0.20 },
-  { x: 55, y: 86, rot:  10, flip: true,  delay: 0.42 },
-  { x: 44, y: 82, rot:  -8, flip: false, delay: 0.64 },
-  { x: 54, y: 78, rot:   8, flip: true,  delay: 0.86 },
-  { x: 45, y: 74, rot:  -6, flip: false, delay: 1.08 },
-  { x: 53, y: 70, rot:   6, flip: true,  delay: 1.30 },
-  { x: 44, y: 66, rot:  -4, flip: false, delay: 1.52 },
-  { x: 52, y: 62, rot:   4, flip: true,  delay: 1.74 },
-  { x: 45, y: 58, rot:  -2, flip: false, delay: 1.96 },
-  { x: 51, y: 54, rot:   2, flip: true,  delay: 2.18 },
+  { x: 59, y: 91, rot:  12, flip: true,  delay: 0.20 },
+  { x: 39, y: 83, rot: -12, flip: false, delay: 0.46 },
+  { x: 59, y: 75, rot:  10, flip: true,  delay: 0.72 },
+  { x: 39, y: 67, rot: -10, flip: false, delay: 0.98 },
+  { x: 59, y: 59, rot:   8, flip: true,  delay: 1.24 },
+  { x: 39, y: 51, rot:  -8, flip: false, delay: 1.50 },
 ];
 
 /** Top-half trail — appears after the button is tapped */
 const WALK_PAWS: Paw[] = [
-  { x: 44, y: 50, rot:  -2, flip: false, delay: 0.00 },
-  { x: 50, y: 46, rot:   2, flip: true,  delay: 0.10 },
-  { x: 45, y: 42, rot:  -1, flip: false, delay: 0.20 },
-  { x: 49, y: 38, rot:   1, flip: true,  delay: 0.30 },
-  { x: 46, y: 34, rot:  -1, flip: false, delay: 0.40 },
-  { x: 48, y: 30, rot:   1, flip: true,  delay: 0.50 },
-  { x: 47, y: 26, rot:   0, flip: false, delay: 0.60 },
-  { x: 48, y: 22, rot:   0, flip: true,  delay: 0.70 },
-  { x: 47, y: 18, rot:   0, flip: false, delay: 0.80 },
-  { x: 48, y: 14, rot:   0, flip: true,  delay: 0.90 },
-  { x: 47, y: 10, rot:   0, flip: false, delay: 1.00 },
+  { x: 59, y: 43, rot:   6, flip: true,  delay: 0.00 },
+  { x: 39, y: 35, rot:  -6, flip: false, delay: 0.12 },
+  { x: 59, y: 27, rot:   4, flip: true,  delay: 0.24 },
+  { x: 39, y: 19, rot:  -4, flip: false, delay: 0.36 },
+  { x: 59, y: 11, rot:   2, flip: true,  delay: 0.48 },
+  { x: 39, y:  4, rot:  -2, flip: false, delay: 0.60 },
 ];
 
 // Last WALK_PAW finishes at delay 1.72 + 0.28 ≈ 2.0 s after tap
