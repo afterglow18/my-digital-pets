@@ -26,9 +26,14 @@ import { getImageUrl } from "@/lib/utils";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const SEASON_OPTIONS   = ["", "Spring", "Summer", "Fall", "Winter", "All Season"];
-const OCCASION_OPTIONS = ["", "Casual", "Work", "Formal", "Sport", "Special Event"];
-const CATEGORY_OPTIONS = ["outfits", "beauty", "toiletries", "essentials"];
+const LIFE_STAGE_OPTIONS = ["", "Puppy / Kitten", "Junior", "Adult", "Senior", "All Ages"];
+const TYPE_OPTIONS       = ["", "Routine", "Preventive", "Emergency", "Grooming", "Training", "Surgery"];
+const CATEGORY_OPTIONS: { value: string; label: string }[] = [
+  { value: "outfits",    label: "Pet Details" },
+  { value: "beauty",     label: "Health" },
+  { value: "toiletries", label: "Care" },
+  { value: "essentials", label: "Records" },
+];
 
 function Field({
   label, value, onChange, placeholder, type = "text",
@@ -57,7 +62,8 @@ function Field({
 function SelectField({
   label, value, onChange, options,
 }: {
-  label: string; value: string; onChange: (v: string) => void; options: string[];
+  label: string; value: string; onChange: (v: string) => void;
+  options: (string | { value: string; label: string })[];
 }) {
   return (
     <div className="flex flex-col gap-1">
@@ -72,9 +78,11 @@ function SelectField({
                      text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-primary
                      cursor-pointer"
         >
-          {options.map((o) => (
-            <option key={o} value={o}>{o || `— ${label} —`}</option>
-          ))}
+          {options.map((o) => {
+            const val = typeof o === "string" ? o : o.value;
+            const lbl = typeof o === "string" ? (o || `— ${label} —`) : o.label;
+            return <option key={val} value={val}>{lbl}</option>;
+          })}
         </select>
         <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-black/40" />
       </div>
@@ -405,27 +413,27 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
         <div className="flex-1 px-4 py-5 flex flex-col gap-4">
 
           <Field
-            label="Item Name"
+            label="Name"
             value={form.name}
             onChange={patch("name") as (v: string) => void}
-            placeholder="e.g. White Linen Shirt"
+            placeholder="e.g. Annual checkup, flea treatment…"
           />
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Brand" value={form.brand} onChange={patch("brand") as (v: string) => void} placeholder="Nike, Zara…" />
-            <Field label="Color" value={form.color} onChange={patch("color") as (v: string) => void} placeholder="Navy Blue" />
+            <Field label="Brand / Provider" value={form.brand} onChange={patch("brand") as (v: string) => void} placeholder="Banfield, PetSmart…" />
+            <Field label="Colour / Breed"   value={form.color} onChange={patch("color") as (v: string) => void} placeholder="Labrador, Tabby…" />
           </div>
 
-          <Field label="Size / Volume" value={form.size} onChange={patch("size") as (v: string) => void} placeholder="30ml, 50ml, Full Size…" />
+          <Field label="Size / Weight" value={form.size} onChange={patch("size") as (v: string) => void} placeholder="5kg, Small, Large…" />
 
           <div className="grid grid-cols-2 gap-3">
-            <SelectField label="Season"   value={form.season}   onChange={patch("season") as (v: string) => void}   options={SEASON_OPTIONS} />
-            <SelectField label="Occasion" value={form.occasion} onChange={patch("occasion") as (v: string) => void} options={OCCASION_OPTIONS} />
+            <SelectField label="Life Stage" value={form.season}   onChange={patch("season") as (v: string) => void}   options={LIFE_STAGE_OPTIONS} />
+            <SelectField label="Type"       value={form.occasion} onChange={patch("occasion") as (v: string) => void} options={TYPE_OPTIONS} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Purchase Price" value={form.purchasePrice} onChange={patch("purchasePrice") as (v: string) => void} placeholder="$49.99" />
-            <Field label="Purchase Date"  value={form.purchaseDate}  onChange={patch("purchaseDate") as (v: string) => void}  type="date" />
+            <Field label="Cost" value={form.purchasePrice} onChange={patch("purchasePrice") as (v: string) => void} placeholder="$49.99" />
+            <Field label="Date" value={form.purchaseDate}  onChange={patch("purchaseDate") as (v: string) => void}  type="date" />
           </div>
 
           <div className="flex flex-col gap-1">
@@ -451,7 +459,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               options={CATEGORY_OPTIONS}
             />
             <div className="flex flex-col gap-1 opacity-50 pointer-events-none">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-black/40">Times Worn</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-black/40">Times Opened</span>
               <div className="border-2 border-black/20 rounded-lg px-3 py-2 text-sm font-medium bg-white/50">
                 {item.timesWorn ?? 0}
               </div>
