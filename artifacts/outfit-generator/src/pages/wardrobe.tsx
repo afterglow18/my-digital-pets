@@ -218,7 +218,8 @@ export default function WardrobePage() {
       style={{
         position: "relative",
         width: "100%",
-        height: `calc(100dvh - ${effectiveNavH}px)`,
+        marginTop: "env(safe-area-inset-top)",
+        height: `calc(100dvh - ${effectiveNavH}px - env(safe-area-inset-top))`,
         overflow: "hidden",
         background: "#C8B9A2",
       }}
