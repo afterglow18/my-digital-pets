@@ -31,24 +31,31 @@ function PawSVG({ size = 30, color = "rgba(101,67,33,0.55)" }: { size?: number; 
 
 type Paw = { x: number; y: number; rot: number; flip: boolean; delay: number };
 
-/** Bottom-half trail — starts near centre, curves rightward up to midscreen */
+// ── Heart shape ───────────────────────────────────────────────────────────────
+// Heart centered at (50%, 38%). Left half draws on load; right half on tap.
+// Rotations follow the tangent direction so each print faces the way of travel.
+// 0° = toes up, 90° = toes right, ±180° = toes down, −90° = toes left.
+
+/** Left side — bottom tip → up the left lobe → top-centre notch */
 const IDLE_PAWS: Paw[] = [
-  { x: 56, y: 91, rot:   8, flip: true,  delay: 0.20 },
-  { x: 42, y: 83, rot:  -8, flip: false, delay: 0.46 },
-  { x: 64, y: 75, rot:  16, flip: true,  delay: 0.72 },
-  { x: 50, y: 67, rot:   4, flip: false, delay: 0.98 },
-  { x: 72, y: 59, rot:  23, flip: true,  delay: 1.24 },
-  { x: 58, y: 51, rot:  10, flip: false, delay: 1.50 },
+  { x: 50, y: 70, rot:  -40, flip: true,  delay: 0.20 },
+  { x: 41, y: 63, rot:  -35, flip: false, delay: 0.46 },
+  { x: 33, y: 55, rot:  -22, flip: true,  delay: 0.72 },
+  { x: 29, y: 46, rot:   -5, flip: false, delay: 0.98 },
+  { x: 30, y: 37, rot:   22, flip: true,  delay: 1.24 },
+  { x: 37, y: 30, rot:   48, flip: false, delay: 1.50 },
+  { x: 46, y: 27, rot:   72, flip: true,  delay: 1.76 },
 ];
 
-/** Top-half trail — continues curving right, exits off the right edge */
+/** Right side — top-centre notch → down the right lobe → bottom tip */
 const WALK_PAWS: Paw[] = [
-  { x: 80, y: 44, rot:  30, flip: true,  delay: 0.00 },
-  { x: 66, y: 36, rot:  16, flip: false, delay: 0.12 },
-  { x: 89, y: 29, rot:  37, flip: true,  delay: 0.24 },
-  { x: 76, y: 21, rot:  22, flip: false, delay: 0.36 },
-  { x: 99, y: 14, rot:  44, flip: true,  delay: 0.48 },
-  { x: 86, y:  6, rot:  30, flip: false, delay: 0.60 },
+  { x: 54, y: 27, rot:  108, flip: false, delay: 0.00 },
+  { x: 63, y: 30, rot:  132, flip: true,  delay: 0.12 },
+  { x: 70, y: 37, rot:  152, flip: false, delay: 0.24 },
+  { x: 71, y: 46, rot:  172, flip: true,  delay: 0.36 },
+  { x: 67, y: 55, rot: -158, flip: false, delay: 0.48 },
+  { x: 59, y: 63, rot: -143, flip: true,  delay: 0.60 },
+  { x: 52, y: 70, rot: -128, flip: false, delay: 0.72 },
 ];
 
 // Last WALK_PAW finishes at delay 1.72 + 0.28 ≈ 2.0 s after tap
@@ -89,9 +96,9 @@ export default function WelcomePage({ onEnter }: Props) {
   const handleEnter = useCallback(() => {
     if (phase !== "idle") return;
     setPhase("walking");
-    setTimeout(() => setPhase("hero"),    1400);
-    setTimeout(() => setPhase("exiting"), 3900);
-    setTimeout(onEnter,                   4700);
+    setTimeout(() => setPhase("hero"),    1100);
+    setTimeout(() => setPhase("exiting"), 3600);
+    setTimeout(onEnter,                   4400);
   }, [phase, onEnter]);
 
   const showWalk   = phase === "walking" || phase === "hero" || phase === "exiting";
