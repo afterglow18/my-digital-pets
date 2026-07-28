@@ -31,24 +31,24 @@ function PawSVG({ size = 30, color = "rgba(101,67,33,0.55)" }: { size?: number; 
 
 type Paw = { x: number; y: number; rot: number; flip: boolean; delay: number };
 
-/** Bottom-half trail — appears on mount, settles around the middle */
+/** Bottom-half trail — starts near centre, curves rightward up to midscreen */
 const IDLE_PAWS: Paw[] = [
-  { x: 59, y: 91, rot:  12, flip: true,  delay: 0.20 },
-  { x: 39, y: 83, rot: -12, flip: false, delay: 0.46 },
-  { x: 59, y: 75, rot:  10, flip: true,  delay: 0.72 },
-  { x: 39, y: 67, rot: -10, flip: false, delay: 0.98 },
-  { x: 59, y: 59, rot:   8, flip: true,  delay: 1.24 },
-  { x: 39, y: 51, rot:  -8, flip: false, delay: 1.50 },
+  { x: 56, y: 91, rot:   8, flip: true,  delay: 0.20 },
+  { x: 42, y: 83, rot:  -8, flip: false, delay: 0.46 },
+  { x: 64, y: 75, rot:  16, flip: true,  delay: 0.72 },
+  { x: 50, y: 67, rot:   4, flip: false, delay: 0.98 },
+  { x: 72, y: 59, rot:  23, flip: true,  delay: 1.24 },
+  { x: 58, y: 51, rot:  10, flip: false, delay: 1.50 },
 ];
 
-/** Top-half trail — appears after the button is tapped */
+/** Top-half trail — continues curving right, exits off the right edge */
 const WALK_PAWS: Paw[] = [
-  { x: 59, y: 43, rot:   6, flip: true,  delay: 0.00 },
-  { x: 39, y: 35, rot:  -6, flip: false, delay: 0.12 },
-  { x: 59, y: 27, rot:   4, flip: true,  delay: 0.24 },
-  { x: 39, y: 19, rot:  -4, flip: false, delay: 0.36 },
-  { x: 59, y: 11, rot:   2, flip: true,  delay: 0.48 },
-  { x: 39, y:  4, rot:  -2, flip: false, delay: 0.60 },
+  { x: 80, y: 44, rot:  30, flip: true,  delay: 0.00 },
+  { x: 66, y: 36, rot:  16, flip: false, delay: 0.12 },
+  { x: 89, y: 29, rot:  37, flip: true,  delay: 0.24 },
+  { x: 76, y: 21, rot:  22, flip: false, delay: 0.36 },
+  { x: 99, y: 14, rot:  44, flip: true,  delay: 0.48 },
+  { x: 86, y:  6, rot:  30, flip: false, delay: 0.60 },
 ];
 
 // Last WALK_PAW finishes at delay 1.72 + 0.28 ≈ 2.0 s after tap
