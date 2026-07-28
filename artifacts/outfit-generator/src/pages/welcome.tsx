@@ -31,31 +31,27 @@ function PawSVG({ size = 30, color = "rgba(101,67,33,0.55)" }: { size?: number; 
 
 type Paw = { x: number; y: number; rot: number; flip: boolean; delay: number };
 
-// ── Heart shape ───────────────────────────────────────────────────────────────
-// Heart centered at (50%, 38%). Left half draws on load; right half on tap.
-// Rotations follow the tangent direction so each print faces the way of travel.
-// 0° = toes up, 90° = toes right, ±180° = toes down, −90° = toes left.
+// ── Diagonal trail — bottom-left → top-right ─────────────────────────────────
+// Paws travel at ~45° across the screen.
+// IDLE draws from bottom-left to centre on load; WALK finishes to top-right on tap.
 
-/** Left side — bottom tip → up the left lobe → top-centre notch */
+/** Bottom-left to centre — appears on mount */
 const IDLE_PAWS: Paw[] = [
-  { x: 50, y: 70, rot:  -40, flip: true,  delay: 0.20 },
-  { x: 41, y: 63, rot:  -35, flip: false, delay: 0.46 },
-  { x: 33, y: 55, rot:  -22, flip: true,  delay: 0.72 },
-  { x: 29, y: 46, rot:   -5, flip: false, delay: 0.98 },
-  { x: 30, y: 37, rot:   22, flip: true,  delay: 1.24 },
-  { x: 37, y: 30, rot:   48, flip: false, delay: 1.50 },
-  { x: 46, y: 27, rot:   72, flip: true,  delay: 1.76 },
+  { x:  8, y: 90, rot: 44, flip: false, delay: 0.20 },
+  { x: 18, y: 80, rot: 44, flip: true,  delay: 0.46 },
+  { x: 28, y: 70, rot: 44, flip: false, delay: 0.72 },
+  { x: 38, y: 60, rot: 44, flip: true,  delay: 0.98 },
+  { x: 48, y: 50, rot: 44, flip: false, delay: 1.24 },
+  { x: 58, y: 40, rot: 44, flip: true,  delay: 1.50 },
 ];
 
-/** Right side — top-centre notch → down the right lobe → bottom tip */
+/** Centre to top-right — appears after tap */
 const WALK_PAWS: Paw[] = [
-  { x: 54, y: 27, rot:  108, flip: false, delay: 0.00 },
-  { x: 63, y: 30, rot:  132, flip: true,  delay: 0.12 },
-  { x: 70, y: 37, rot:  152, flip: false, delay: 0.24 },
-  { x: 71, y: 46, rot:  172, flip: true,  delay: 0.36 },
-  { x: 67, y: 55, rot: -158, flip: false, delay: 0.48 },
-  { x: 59, y: 63, rot: -143, flip: true,  delay: 0.60 },
-  { x: 52, y: 70, rot: -128, flip: false, delay: 0.72 },
+  { x: 63, y: 33, rot: 44, flip: false, delay: 0.00 },
+  { x: 71, y: 25, rot: 44, flip: true,  delay: 0.12 },
+  { x: 79, y: 17, rot: 44, flip: false, delay: 0.24 },
+  { x: 87, y:  9, rot: 44, flip: true,  delay: 0.36 },
+  { x: 95, y:  2, rot: 44, flip: false, delay: 0.48 },
 ];
 
 // Last WALK_PAW finishes at delay 1.72 + 0.28 ≈ 2.0 s after tap
