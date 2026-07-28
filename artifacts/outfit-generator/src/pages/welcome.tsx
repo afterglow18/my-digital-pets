@@ -66,12 +66,14 @@ const WALK_PAWS: Paw[] = [
 
 // ── Paw mark component ────────────────────────────────────────────────────────
 
-function PawMark({ paw, visible }: { paw: Paw; visible: boolean }) {
+function PawMark({ paw, visible, hide }: { paw: Paw; visible: boolean; hide?: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.3 }}
-      animate={visible ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.3 }}
-      transition={{ delay: visible ? paw.delay : 0, duration: 0.28, ease: "easeOut" }}
+      animate={hide ? { opacity: 0 } : visible ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.3 }}
+      transition={hide
+        ? { duration: 0.4, ease: "easeIn" }
+        : { delay: visible ? paw.delay : 0, duration: 0.28, ease: "easeOut" }}
       style={{
         position: "absolute",
         left: `${paw.x}%`,
@@ -140,12 +142,12 @@ export default function WelcomePage({ onEnter }: Props) {
 
       {/* ── Idle paw trail (bottom half) ── */}
       {IDLE_PAWS.map((paw, i) => (
-        <PawMark key={`idle-${i}`} paw={paw} visible={true} />
+        <PawMark key={`idle-${i}`} paw={paw} visible={true} hide={showHero} />
       ))}
 
       {/* ── Walking paw trail (top half, revealed on tap) ── */}
       {WALK_PAWS.map((paw, i) => (
-        <PawMark key={`walk-${i}`} paw={paw} visible={showWalk} />
+        <PawMark key={`walk-${i}`} paw={paw} visible={showWalk} hide={showHero} />
       ))}
 
       {/* ── CTA button (white phase only) ── */}
