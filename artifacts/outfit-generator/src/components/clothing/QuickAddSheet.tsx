@@ -28,10 +28,10 @@ import { removeBackground, blobToDataUrl, dataUrlToBlob } from "@/lib/background
 type Category = "outfits" | "beauty" | "toiletries" | "essentials";
 
 const CATEGORY_LABELS: Record<Category, string> = {
-  outfits:    "Outfits",
-  beauty:     "Beauty",
-  toiletries: "Toiletries",
-  essentials: "Essentials",
+  outfits:    "Pet Details",
+  beauty:     "Health",
+  toiletries: "Care",
+  essentials: "Records",
 };
 
 type Phase = "pick" | "encoding" | "preview" | "uploading";

@@ -238,9 +238,8 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
   const dirty = isDirty(form, item);
 
-  // Cleaned photos are stored as PNG data URLs; originals are JPEG.
-  // Hide the Clean Up button once the photo has already been cleaned.
-  const isAlreadyCleaned = (displayImageUrl ?? "").startsWith("data:image/png");
+  // Always allow cleaning — PNG detection was hiding the button on unclean PNG uploads.
+  const isAlreadyCleaned = false;
 
   const patch = (key: keyof FormState) => (value: string | boolean) =>
     setForm((prev) => prev ? { ...prev, [key]: value } : prev);
