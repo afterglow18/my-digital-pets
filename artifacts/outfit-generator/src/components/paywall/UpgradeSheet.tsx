@@ -177,9 +177,16 @@ export function UpgradeSheet({ reason, onClose }: Props) {
       className="fixed inset-0 z-[80] flex flex-col max-w-md md:max-w-2xl mx-auto"
       style={{ background: "#F8F4ED" }}
     >
-      {/* Close button */}
-      <div className="flex justify-end px-4 pb-0 flex-shrink-0"
-        style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}>
+      {/* Plaid banner */}
+      <div
+        className="flex-shrink-0 flex justify-end px-4"
+        style={{
+          paddingTop: "max(1rem, env(safe-area-inset-top))",
+          paddingBottom: "1rem",
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='%23C4A882'/%3E%3Crect width='60' height='14' y='0' fill='%23A07848' opacity='0.45'/%3E%3Crect width='60' height='14' y='23' fill='%23A07848' opacity='0.45'/%3E%3Crect width='60' height='14' y='46' fill='%23A07848' opacity='0.45'/%3E%3Crect width='14' height='60' x='0' fill='%23A07848' opacity='0.45'/%3E%3Crect width='14' height='60' x='23' fill='%23A07848' opacity='0.45'/%3E%3Crect width='14' height='60' x='46' fill='%23A07848' opacity='0.45'/%3E%3Crect width='60' height='4' y='5' fill='%23D4BC96' opacity='0.5'/%3E%3Crect width='60' height='4' y='28' fill='%23D4BC96' opacity='0.5'/%3E%3Crect width='60' height='4' y='51' fill='%23D4BC96' opacity='0.5'/%3E%3Crect width='4' height='60' x='5' fill='%23D4BC96' opacity='0.5'/%3E%3Crect width='4' height='60' x='28' fill='%23D4BC96' opacity='0.5'/%3E%3Crect width='4' height='60' x='51' fill='%23D4BC96' opacity='0.5'/%3E%3C/svg%3E")`,
+          backgroundSize: "60px 60px",
+        }}
+      >
         <button
           onClick={onClose}
           aria-label="Close"
