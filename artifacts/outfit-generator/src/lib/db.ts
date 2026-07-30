@@ -27,6 +27,7 @@ export interface StoredClothingItem {
   isFavorite:     boolean;
   timesWorn:      number;
   bgRemoved?:     boolean;          // true once background removal has been confirmed
+  lastWalkedDate?: string | null;   // "YYYY-MM-DD" local date of last walk log; null if never
   color?:         string | null;
   brand?:         string | null;
   size?:          string | null;

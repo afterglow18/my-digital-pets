@@ -26,6 +26,21 @@ import { getImageUrl } from "@/lib/utils";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+/** Returns today's date as a "YYYY-MM-DD" local string (no UTC offset issues). */
+function todayStr(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Formats "YYYY-MM-DD" → "M/D/YY" for display. */
+function formatWalkDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return `${m}/${d}/${String(y).slice(-2)}`;
+}
+
 const LIFE_STAGE_OPTIONS = ["", "Puppy / Kitten", "Junior", "Adult", "Senior", "All Ages"];
 const TYPE_OPTIONS       = ["", "Routine", "Preventive", "Emergency", "Grooming", "Training", "Surgery"];
 const CATEGORY_OPTIONS: { value: string; label: string }[] = [
@@ -140,6 +155,11 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   const [form,             setForm]             = useState<FormState | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // ── Walk tracking state ────────────────────────────────────────────────────
+  const [localTimesWalked,    setLocalTimesWalked]    = useState(0);
+  const [localLastWalkedDate, setLocalLastWalkedDate] = useState<string | null>(null);
+  const [prevLastWalkedDate,  setPrevLastWalkedDate]  = useState<string | null>(null);
+
   // ── Optimistic image state ─────────────────────────────────────────────────
   // Updated immediately on confirm so the photo never flashes back to the old
   // version while the DB write is in-flight.
@@ -163,6 +183,9 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     if (item) {
       setForm(toForm(item));
       setDisplayImageUrl(item.imageObjectPath ?? null);
+      setLocalTimesWalked(item.timesWorn ?? 0);
+      setLocalLastWalkedDate(item.lastWalkedDate ?? null);
+      setPrevLastWalkedDate(null);
     }
     setShowDeleteConfirm(false);
     setCompareOpen(false);
@@ -249,6 +272,40 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
   // Disable once background removal has been confirmed on this item.
   const isAlreadyCleaned = item.bgRemoved === true;
+
+  // ── Walk tracking ─────────────────────────────────────────────────────────
+  // Compare against today at render time — no timers; auto-resets at midnight.
+  const today = todayStr();
+  const walkedToday = localLastWalkedDate === today;
+
+  const saveWalkFields = (timesWalked: number, lastDate: string | null) => {
+    updateItem.mutate(
+      { id: item.id, data: { timesWorn: timesWalked, lastWalkedDate: lastDate } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
+        },
+      },
+    );
+  };
+
+  const handleWalkToday = () => {
+    const newCount = localTimesWalked + 1;
+    setPrevLastWalkedDate(localLastWalkedDate);
+    setLocalTimesWalked(newCount);
+    setLocalLastWalkedDate(today);
+    saveWalkFields(newCount, today);
+  };
+
+  const handleUndoWalk = () => {
+    const newCount = Math.max(0, localTimesWalked - 1);
+    const restored = prevLastWalkedDate;
+    setLocalTimesWalked(newCount);
+    setLocalLastWalkedDate(restored);
+    setPrevLastWalkedDate(null);
+    saveWalkFields(newCount, restored);
+  };
 
   const patch = (key: keyof FormState) => (value: string | boolean) =>
     setForm((prev) => prev ? { ...prev, [key]: value } : prev);
@@ -366,7 +423,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
         {/* ── Photo ── */}
         {shownImageUrl && (
-          <div className="flex-shrink-0 border-b-2 border-black">
+          <div className="flex-shrink-0">
             {/* Image with checkerboard to reveal transparency on cleaned PNGs */}
             <div
               className="w-full h-36"
@@ -381,34 +438,56 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                 className="w-full h-full object-contain"
               />
             </div>
-
-            {/* Clean Up Photo button — hidden once photo has been cleaned */}
-            {!isAlreadyCleaned && <div className="px-4 py-2">
-              <button
-                onClick={handleCleanUpPhoto}
-                disabled={bgProcessing && !compareOpen}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl
-                           border-2 border-black bg-white font-display font-bold text-sm uppercase tracking-tight
-                           shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
-                           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all
-                           disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
-                           disabled:translate-x-0 disabled:translate-y-0"
-              >
-                {bgProcessing && !compareOpen ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Starting…
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    Clean Up Photo
-                  </>
-                )}
-              </button>
-            </div>}
           </div>
         )}
+
+        {/* ── Photo actions + Walk Today (always visible) ── */}
+        <div className="px-4 py-2 border-b-2 border-black flex gap-2 flex-shrink-0">
+          {/* Clean Up Photo — only shown when photo exists and not yet cleaned */}
+          {shownImageUrl && !isAlreadyCleaned && (
+            <button
+              onClick={handleCleanUpPhoto}
+              disabled={bgProcessing && !compareOpen}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
+                         border-2 border-black bg-white font-display font-bold text-sm uppercase tracking-tight
+                         shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
+                         active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                         disabled:translate-x-0 disabled:translate-y-0"
+            >
+              {bgProcessing && !compareOpen ? (
+                <><Loader2 className="w-4 h-4 animate-spin" />Starting…</>
+              ) : (
+                <><Sparkles className="w-4 h-4" />Clean Up Photo</>
+              )}
+            </button>
+          )}
+
+          {/* Walked Today / Logged ✓ · Undo */}
+          {walkedToday ? (
+            <button
+              onClick={handleUndoWalk}
+              className={`${shownImageUrl && !isAlreadyCleaned ? "flex-1" : "w-full"} flex items-center justify-center gap-2 py-2.5 rounded-xl
+                         border-2 border-emerald-600 bg-emerald-500 text-white
+                         font-display font-bold text-sm uppercase tracking-tight
+                         shadow-[3px_3px_0px_0px_rgba(4,120,87,1)]
+                         active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all`}
+            >
+              ✓ Logged · Undo
+            </button>
+          ) : (
+            <button
+              onClick={handleWalkToday}
+              className={`${shownImageUrl && !isAlreadyCleaned ? "flex-1" : "w-full"} flex items-center justify-center gap-2 py-2.5 rounded-xl
+                         border-2 border-black bg-white
+                         font-display font-bold text-sm uppercase tracking-tight
+                         shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
+                         active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all`}
+            >
+              🐾 Walked Today
+            </button>
+          )}
+        </div>
 
         {/* ── Form ── */}
         <div className="flex-1 px-4 py-5 flex flex-col gap-4">
@@ -459,11 +538,38 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               onChange={patch("category") as (v: string) => void}
               options={CATEGORY_OPTIONS}
             />
-            <div className="flex flex-col gap-1 opacity-50 pointer-events-none">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-black/40">Times Opened</span>
-              <div className="border-2 border-black/20 rounded-lg px-3 py-2 text-sm font-medium bg-white/50">
-                {item.timesWorn ?? 0}
-              </div>
+            {/* Times Walked — editable; also updated by the Walk Today button */}
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-black/40">
+                Times Walked
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={localTimesWalked}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? 0 : Math.max(0, parseInt(e.target.value) || 0);
+                  setLocalTimesWalked(val);
+                }}
+                onBlur={() => {
+                  updateItem.mutate(
+                    { id: item.id, data: { timesWorn: localTimesWalked } },
+                    {
+                      onSuccess: () => {
+                        queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
+                        queryClient.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
+                      },
+                    },
+                  );
+                }}
+                className="w-full border-2 border-black rounded-lg px-3 py-2 text-sm font-medium
+                           bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              {localLastWalkedDate && (
+                <span className="text-[11px] text-black/40 font-medium">
+                  Last walked: {formatWalkDate(localLastWalkedDate)}
+                </span>
+              )}
             </div>
           </div>
 
