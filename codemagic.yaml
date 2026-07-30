@@ -98,8 +98,15 @@ workflows:
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" App/Info.plist 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" App/Info.plist
           # Required for Face ID usage
-          /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'My Pets uses Face ID to protect your wardrobe.'" App/Info.plist 2>/dev/null || \
-          /usr/libexec/PlistBuddy -c "Set :NSFaceIDUsageDescription 'My Pets uses Face ID to protect your wardrobe.'" App/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'My Pets uses Face ID to protect your pets.' " App/Info.plist 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSFaceIDUsageDescription 'My Pets uses Face ID to protect your pets.'" App/Info.plist
+          # Camera and photo library — belt-and-suspenders in case cap sync doesn't inject these
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'My Pets uses your camera so you can photograph your pets and their details.'" App/Info.plist 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'My Pets uses your camera so you can photograph your pets and their details.'" App/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'My Pets reads your photo library so you can choose existing photos of your pets.'" App/Info.plist 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'My Pets reads your photo library so you can choose existing photos of your pets.'" App/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string 'My Pets saves photos you take to your library so you can access them later.'" App/Info.plist 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryAddUsageDescription 'My Pets saves photos you take to your library so you can access them later.'" App/Info.plist
 
       - name: Re-apply provisioning profiles after cap sync
         script: |

@@ -18,9 +18,9 @@ const config: CapacitorConfig = {
     // Privacy usage descriptions — required by iOS / App Store review
     infoPlist: {
       NSCameraUsageDescription:
-        'My Pets uses your camera so you can photograph clothing items to add to your wardrobe.',
+        'My Pets uses your camera so you can photograph your pets and their details.',
       NSPhotoLibraryUsageDescription:
-        'My Pets reads your photo library so you can choose existing photos of your clothing items.',
+        'My Pets reads your photo library so you can choose existing photos of your pets.',
       NSPhotoLibraryAddUsageDescription:
         'My Pets saves photos you take to your library so you can access them later.',
     },
