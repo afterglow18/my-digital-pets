@@ -508,12 +508,12 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
       </div>
 
       {/* Hidden file inputs */}
-      {/* Camera — opens native camera on mobile (single shot) */}
+      {/* Camera — shows native photo picker (camera + library); capture="environment" removed
+           as it force-opens rear camera directly and is a known crash trigger in WKWebView */}
       <input
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleInputChange}
       />
