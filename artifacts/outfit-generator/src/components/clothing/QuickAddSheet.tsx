@@ -101,6 +101,9 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
   const [bgProcessing, setBgProcessing] = useState(false);
   const [bgFailed,     setBgFailed]     = useState(false);
   const [selected,     setSelected]     = useState<"original" | "cleaned">("original");
+  // Queue for multi-photo selection — each photo goes through preview/compare individually
+  const [fileQueue,    setFileQueue]    = useState<File[]>([]);
+  const savedCountRef  = useRef(0);  // tracks saves within this open session for naming
 
   // Each photo bumps this counter. Every async step checks it before writing state —
   // prevents a slow first photo from clobbering a fast second one.
@@ -126,6 +129,8 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
     setCleanedUrl(null);
     setBgFailed(false);
     setSelected("original");
+    setFileQueue([]);
+    savedCountRef.current = 0;
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -193,7 +198,8 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
     try {
       const dataUrl  = await blobToDataUrl(blob);
       const label    = CATEGORY_LABELS[category];
-      const autoName = existingCount === 0 ? label : `${label} ${existingCount + 1}`;
+      const n        = existingCount + savedCountRef.current;
+      const autoName = n === 0 ? label : `${label} ${n + 1}`;
       await new Promise<void>((resolve, reject) => {
         createItem.mutate(
           { data: { name: autoName, category, imageObjectPath: dataUrl } },
@@ -208,64 +214,34 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
           },
         );
       });
-      handleClose();
+      savedCountRef.current += 1;
+      // If more photos are queued, process the next one instead of closing
+      setFileQueue(prev => {
+        const [next, ...rest] = prev;
+        if (next) {
+          handleFile(next);
+          return rest;
+        }
+        handleClose();
+        return [];
+      });
     } catch (err) {
       setErrorMsg(`Save failed: ${err instanceof Error ? err.message : String(err)}`);
       setPhase("preview");
     }
-  }, [selected, cleanedBlob, originalBlob, handleClose, category, existingCount, createItem, queryClient, onCreated]);
-
-  // ── Batch upload (multi-file, no preview) ────────────────────────────────
-
-  const handleBatch = useCallback(async (files: File[]) => {
-    setErrorMsg(null);
-    setPhase("uploading");
-    let failed = 0;
-    for (let i = 0; i < files.length; i++) {
-      try {
-        const jpeg    = await encodeForUpload(files[i]);
-        const dataUrl = await blobToDataUrl(jpeg);
-        const label   = CATEGORY_LABELS[category];
-        const n       = existingCount + i;
-        const name    = n === 0 ? label : `${label} ${n + 1}`;
-        await new Promise<void>((resolve, reject) => {
-          createItem.mutate(
-            { data: { name, category, imageObjectPath: dataUrl } },
-            {
-              onSuccess: (created) => {
-                queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
-                queryClient.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
-                if (onCreated) onCreated(created);
-                resolve();
-              },
-              onError: reject,
-            },
-          );
-        });
-      } catch {
-        failed++;
-      }
-    }
-    if (failed > 0) {
-      setErrorMsg(`${failed} photo${failed > 1 ? "s" : ""} could not be saved. Please try again.`);
-      setPhase("pick");
-    } else {
-      handleClose();
-    }
-  }, [category, existingCount, createItem, queryClient, onCreated, handleClose]);
+  }, [selected, cleanedBlob, originalBlob, handleClose, handleFile, category, existingCount, createItem, queryClient, onCreated]);
 
   // ── Input handler ─────────────────────────────────────────────────────────
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) { e.target.value = ""; return; }
-    // Single photo → preview + bg-removal flow
-    // Multiple photos → fast batch upload (preview doesn't scale to 10 shots)
-    if (files.length === 1) {
-      handleFile(files[0]);
-    } else {
-      handleBatch(files);
-    }
+    // All photos — single or multiple — go through the preview/compare flow.
+    // For multiple files, queue the rest and process the first immediately.
+    savedCountRef.current = 0;
+    const [first, ...rest] = files;
+    setFileQueue(rest);
+    handleFile(first);
     e.target.value = "";
   };
 
