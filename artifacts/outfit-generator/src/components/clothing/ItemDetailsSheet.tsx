@@ -216,9 +216,10 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     setDisplayImageUrl(chosenUrl);
     setCompareOpen(false);
 
-    // Fire DB write in background
+    // Fire DB write in background — also flag bgRemoved when cleaned version chosen
+    const wasCleaned = selected === "cleaned" && !!cleanedUrl;
     updateItem.mutate(
-      { id: item.id, data: { imageObjectPath: chosenUrl } },
+      { id: item.id, data: { imageObjectPath: chosenUrl, ...(wasCleaned ? { bgRemoved: true } : {}) } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
@@ -246,8 +247,8 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
   const dirty = isDirty(form, item);
 
-  // Always allow cleaning — PNG detection was hiding the button on unclean PNG uploads.
-  const isAlreadyCleaned = false;
+  // Disable once background removal has been confirmed on this item.
+  const isAlreadyCleaned = item.bgRemoved === true;
 
   const patch = (key: keyof FormState) => (value: string | boolean) =>
     setForm((prev) => prev ? { ...prev, [key]: value } : prev);
