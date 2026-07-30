@@ -43,10 +43,10 @@ type RowKey   = "outfits" | "beauty" | "toiletries" | "essentials";
 type Category = "outfits" | "beauty" | "toiletries" | "essentials";
 
 const ROWS: { key: RowKey; label: string; btnLabel: string }[] = [
-  { key: "outfits",    label: "Pet Details", btnLabel: "+ ADD PET DETAILS" },
-  { key: "beauty",     label: "Health",      btnLabel: "+ ADD HEALTH"      },
-  { key: "toiletries", label: "Care",        btnLabel: "+ ADD CARE"        },
-  { key: "essentials", label: "Records",     btnLabel: "+ ADD RECORDS"     },
+  { key: "outfits",    label: "+ Add Pet Details", btnLabel: "+ ADD PET DETAILS" },
+  { key: "beauty",     label: "+ Add Health",      btnLabel: "+ ADD HEALTH"      },
+  { key: "toiletries", label: "+ Add Care",        btnLabel: "+ ADD CARE"        },
+  { key: "essentials", label: "+ Add Records",     btnLabel: "+ ADD RECORDS"     },
 ];
 
 // ── Image constants ───────────────────────────────────────────────────────────
