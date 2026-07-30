@@ -468,9 +468,9 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
             <button
               onClick={handleUndoWalk}
               className={`${shownImageUrl && !isAlreadyCleaned ? "flex-1" : "w-full"} flex items-center justify-center gap-2 py-2.5 rounded-xl
-                         border-2 border-emerald-600 bg-emerald-500 text-white
+                         border-2 border-green-900 bg-green-800 text-white
                          font-display font-bold text-sm uppercase tracking-tight
-                         shadow-[3px_3px_0px_0px_rgba(4,120,87,1)]
+                         shadow-[3px_3px_0px_0px_rgba(20,83,45,1)]
                          active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all`}
             >
               ✓ Logged · Undo
