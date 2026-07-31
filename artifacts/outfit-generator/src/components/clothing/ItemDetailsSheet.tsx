@@ -484,7 +484,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                          shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
                          active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all`}
             >
-              🐾 Walked Today
+              🐾 Pet Care Today
             </button>
           )}
         </div>
@@ -541,7 +541,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
             {/* Times Walked — editable; also updated by the Walk Today button */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold uppercase tracking-widest text-black/40">
-                Times Walked
+                Times Cared
               </label>
               <input
                 type="number"
@@ -567,7 +567,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               />
               {localLastWalkedDate && (
                 <span className="text-[11px] text-black/40 font-medium">
-                  Last walked: {formatWalkDate(localLastWalkedDate)}
+                  Last cared: {formatWalkDate(localLastWalkedDate)}
                 </span>
               )}
             </div>
