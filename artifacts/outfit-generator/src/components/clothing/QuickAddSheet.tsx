@@ -484,7 +484,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
                            disabled:translate-x-0 disabled:translate-y-0"
               >
                 <Check className="w-4 h-4" strokeWidth={3} />
-                {selected === "cleaned" && !cleanedUrl ? "Processing…" : "Save to Closet"}
+                {selected === "cleaned" && !cleanedUrl ? "Processing…" : "Save Original"}
               </button>
             </div>
           </div>
