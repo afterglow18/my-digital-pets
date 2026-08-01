@@ -48,6 +48,15 @@ workflows:
       - name: Capacitor add iOS and sync
         script: |
           cd artifacts/outfit-generator
+          # Fix pnpm symlinks so Xcode can compile the RevenueCat Swift plugin.
+          # Without this, the symlinked node_modules directory isn't a real dir
+          # and Xcode cannot resolve the Swift source files inside it.
+          RC_PATH="node_modules/@revenuecat/purchases-capacitor"
+          if [ -L "$RC_PATH" ]; then
+            cp -rL "$RC_PATH" "${RC_PATH}-real"
+            rm "$RC_PATH"
+            mv "${RC_PATH}-real" "$RC_PATH"
+          fi
           rm -rf ios
           npx cap add ios
           npx cap sync ios
