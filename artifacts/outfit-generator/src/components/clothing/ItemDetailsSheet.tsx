@@ -9,7 +9,7 @@
  */
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Trash2, Save, ChevronDown, Sparkles, Loader2, BookMarked } from "lucide-react";
+import { X, Heart, Trash2, Save, ChevronDown, Sparkles, Loader2 } from "lucide-react";
 import { removeBackground } from "@/lib/backgroundRemoval";
 import { BgCompareSheet } from "./BgCompareSheet";
 import { LookbookPickerSheet } from "./LookbookPickerSheet";
@@ -457,7 +457,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
                          shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
                          active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
-              <BookMarked className="w-4 h-4" />Add to Lookbook
+              🐶 Add to Lookbook
             </button>
           ) : (
             /* Clean Up Photo — only shown when photo exists and not yet cleaned */
