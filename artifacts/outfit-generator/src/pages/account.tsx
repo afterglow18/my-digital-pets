@@ -116,7 +116,7 @@ export default function AccountPage() {
     setExportPending(true);
     try {
       await exportBackup();
-      /* success — no banner needed; file share sheet is confirmation enough */
+      flash("success", "Backup exported — save it to Files or iCloud Drive.");
     } catch (err) {
       flash("error", err instanceof Error ? err.message : "Export failed");
     } finally {
@@ -132,7 +132,11 @@ export default function AccountPage() {
       await qc.invalidateQueries({ queryKey: getListClothingQueryKey() });
       await qc.invalidateQueries({ queryKey: getListOutfitsQueryKey() });
       await qc.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
-      /* success — wardrobe refreshes automatically; no banner needed */
+      flash(
+        "success",
+        `Restored ${result.clothingAdded} items and ${result.outfitsAdded} outfits.` +
+          (result.skippedItems > 0 ? ` (${result.skippedItems} skipped — already exist.)` : ""),
+      );
     } catch (err) {
       flash("error", err instanceof Error ? err.message : "Import failed");
     } finally {
@@ -143,7 +147,7 @@ export default function AccountPage() {
   const handleRestore = async () => {
     try {
       await restore();
-      /* success — Current Plan card updates automatically; no banner needed */
+      flash("success", "Purchases restored.");
     } catch (err) {
       flash("error", err instanceof Error ? err.message : "Could not restore");
     }
@@ -196,13 +200,7 @@ export default function AccountPage() {
             </span>
           </div>
 
-          {isSubscribed ? (
-            <div className="flex items-center gap-2 text-sm font-semibold text-green-700
-                            bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-              <Check className="w-4 h-4 shrink-0" />
-              Pro Stylist active — unlimited everything
-            </div>
-          ) : (
+          {!isSubscribed && (
             <YellowButton
               onClick={() => setShowUpgrade(true)}
               icon={() => null}
