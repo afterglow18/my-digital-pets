@@ -15,7 +15,7 @@
 import { openDB, type IDBPDatabase } from "idb";
 
 export const DB_NAME    = "my-digital-pets";
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 // ── Stored types (IndexedDB records) ─────────────────────────────────────────
 
@@ -36,6 +36,10 @@ export interface StoredClothingItem {
   purchasePrice?: string | null;
   purchaseDate?:  string | null;
   notes?:         string | null;
+  // Vision indexing fields (added in DB v2 — absent on old records, treated as defaults)
+  visionLabels?:  string[] | null;  // color/object labels extracted from the photo
+  visionText?:    string[] | null;  // OCR text detected inside the photo
+  visionVersion?: number;           // 0=unanalyzed, 1=iOS, 4=web OK, 5=web/no labels
   createdAt:      string;
   updatedAt:      string;
 }

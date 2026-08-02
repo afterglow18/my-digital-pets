@@ -9,9 +9,10 @@
  */
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Trash2, Save, ChevronDown, Sparkles, Loader2 } from "lucide-react";
+import { X, Heart, Trash2, Save, ChevronDown, Sparkles, Loader2, BookMarked } from "lucide-react";
 import { removeBackground } from "@/lib/backgroundRemoval";
 import { BgCompareSheet } from "./BgCompareSheet";
+import { LookbookPickerSheet } from "./LookbookPickerSheet";
 import {
   type ClothingItem,
   type ClothingItemUpdateCategory,
@@ -108,9 +109,12 @@ function SelectField({
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface ItemDetailsSheetProps {
-  item:      ClothingItem | null;
-  onClose:   () => void;
-  onDeleted?: () => void;
+  item:               ClothingItem | null;
+  onClose:            () => void;
+  onDeleted?:         () => void;
+  /** When true: show "Add to Lookbook" button (search/favorites context).
+   *  When false (default): show "Clean Up Photo" button (wardrobe context). */
+  showAddToLookbook?: boolean;
 }
 
 interface FormState {
@@ -151,7 +155,7 @@ function isDirty(form: FormState, item: ClothingItem): boolean {
   );
 }
 
-export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetProps) {
+export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook = false }: ItemDetailsSheetProps) {
   const [form,             setForm]             = useState<FormState | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -166,11 +170,12 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   const [displayImageUrl, setDisplayImageUrl] = useState<string | null>(null);
 
   // ── Compare sheet state ────────────────────────────────────────────────────
-  const [compareOpen,  setCompareOpen]  = useState(false);
-  const [cleanedUrl,   setCleanedUrl]   = useState<string | null>(null);
-  const [bgProcessing, setBgProcessing] = useState(false);
-  const [bgFailed,     setBgFailed]     = useState(false);
-  const [selected,     setSelected]     = useState<"original" | "cleaned">("original");
+  const [compareOpen,       setCompareOpen]       = useState(false);
+  const [cleanedUrl,        setCleanedUrl]        = useState<string | null>(null);
+  const [bgProcessing,      setBgProcessing]      = useState(false);
+  const [bgFailed,          setBgFailed]          = useState(false);
+  const [selected,          setSelected]          = useState<"original" | "cleaned">("original");
+  const [lookbookPickerOpen, setLookbookPickerOpen] = useState(false);
   // Generation counter — prevents stale async result writing if item changes mid-removal
   const bgGenRef = useRef(0);
 
@@ -443,24 +448,37 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
         {/* ── Photo actions + Walk Today (always visible) ── */}
         <div className="px-4 py-2 border-b-2 border-black flex gap-2 flex-shrink-0">
-          {/* Clean Up Photo — only shown when photo exists and not yet cleaned */}
-          {shownImageUrl && !isAlreadyCleaned && (
+          {/* Add to Lookbook (search/favorites context) OR Clean Up Photo (wardrobe context) */}
+          {showAddToLookbook ? (
             <button
-              onClick={handleCleanUpPhoto}
-              disabled={bgProcessing && !compareOpen}
+              onClick={() => setLookbookPickerOpen(true)}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
                          border-2 border-black bg-white font-display font-bold text-sm uppercase tracking-tight
                          shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
-                         active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all
-                         disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
-                         disabled:translate-x-0 disabled:translate-y-0"
+                         active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
-              {bgProcessing && !compareOpen ? (
-                <><Loader2 className="w-4 h-4 animate-spin" />Starting…</>
-              ) : (
-                <><Sparkles className="w-4 h-4" />Clean Up Photo</>
-              )}
+              <BookMarked className="w-4 h-4" />Add to Lookbook
             </button>
+          ) : (
+            /* Clean Up Photo — only shown when photo exists and not yet cleaned */
+            shownImageUrl && !isAlreadyCleaned && (
+              <button
+                onClick={handleCleanUpPhoto}
+                disabled={bgProcessing && !compareOpen}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
+                           border-2 border-black bg-white font-display font-bold text-sm uppercase tracking-tight
+                           shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
+                           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all
+                           disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                           disabled:translate-x-0 disabled:translate-y-0"
+              >
+                {bgProcessing && !compareOpen ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />Starting…</>
+                ) : (
+                  <><Sparkles className="w-4 h-4" />Clean Up Photo</>
+                )}
+              </button>
+            )
           )}
 
           {/* Walked Today / Logged ✓ · Undo */}
@@ -644,6 +662,16 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
         onSelect={setSelected}
         onConfirm={handleConfirm}
       />
+
+      {/* ── LookbookPickerSheet — z-80 ── */}
+      <AnimatePresence>
+        {lookbookPickerOpen && item && (
+          <LookbookPickerSheet
+            item={item}
+            onClose={() => setLookbookPickerOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

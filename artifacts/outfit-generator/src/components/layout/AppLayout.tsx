@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Heart, Bookmark, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetWardrobeStats } from "@/hooks/useLocalDB";
+import { startVisionIndexer } from "@/lib/visionIndexer";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,9 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const [location] = useLocation();
   const { data: stats } = useGetWardrobeStats();
+
+  // Start vision indexer once on mount — processes photos for search
+  useEffect(() => { void startVisionIndexer(); }, []);
 
   const wardrobeCount = stats?.byCategory
     ? stats.byCategory
