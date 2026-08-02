@@ -6,12 +6,13 @@
  *
  * Version scheme:
  *   0  = unanalyzed
- *   1  = iOS Vision done (don't re-run on iOS)
+ *   1  = iOS Vision only, no canvas colors (legacy — must re-index)
+ *   2  = iOS Vision + canvas colors (current iOS target)
  *   4  = web canvas OK
  *   5  = web analyzed, no labels found (skip retry)
  *
  * On web: re-index anything with visionVersion < 4 (0, 1, 2, 3).
- * On iOS: re-index anything with visionVersion < 1 (0 only).
+ * On iOS: re-index anything with visionVersion < 2 (0 or 1).
  */
 
 import { Capacitor } from "@capacitor/core";

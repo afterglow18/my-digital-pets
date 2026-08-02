@@ -4,10 +4,14 @@
  * Two extraction paths:
  *   1. Web — canvas-based dominant-color analysis (48×48, corner bg exclusion)
  *   2. iOS — Capacitor Swift plugin (VNClassifyImageRequest + VNRecognizeTextRequest)
+ *            PLUS canvas color extraction run in parallel, results merged.
+ *            Apple Vision classifies object types but never emits color names,
+ *            so canvas colors are required on iOS too.
  *
  * Version scheme:
  *   0  = unanalyzed
- *   1  = iOS Vision OK
+ *   1  = iOS Vision only (no canvas colors — legacy, must re-index)
+ *   2  = iOS Vision + canvas colors
  *   4  = web canvas OK
  *   5  = web analyzed but no labels found (skip retry)
  */
@@ -24,25 +28,50 @@ const VisionPlugin = registerPlugin<VisionPluginInterface>("Vision");
 
 export const WEB_VISION_VERSION     = 4;
 export const WEB_NO_LABELS_VERSION  = 5;
-export const IOS_VISION_VERSION     = 1;
+/** v2: iOS Vision labels + canvas colors merged. v1 was Vision-only (no colors). */
+export const IOS_VISION_VERSION     = 2;
 
 // ── iOS Vision ────────────────────────────────────────────────────────────────
 
 /**
- * Call the Swift Capacitor plugin. Returns { labels, text }; on any failure
- * returns empty arrays (silent fallback as spec'd).
+ * Call the Swift Capacitor plugin AND run canvas color extraction in parallel,
+ * then merge the results.
+ *
+ * Apple Vision classifies object types ("shoe", "high heel") but never emits
+ * color names, so canvas colors must be added on iOS too.
+ *
+ * Returns { labels: [...visionLabels, ...canvasColors], text }; on any failure
+ * the failing half is treated as empty arrays (silent fallback as spec'd).
  */
 export async function extractIOSVision(
   imageDataUrl: string,
 ): Promise<{ labels: string[]; text: string[] }> {
   if (!Capacitor.isNativePlatform()) return { labels: [], text: [] };
-  try {
-    // Strip the data-url prefix — plugin expects raw base64
-    const base64 = imageDataUrl.replace(/^data:[^;]+;base64,/, "");
-    return await VisionPlugin.analyze({ imageBase64: base64 });
-  } catch {
-    return { labels: [], text: [] };
+
+  // Run Vision plugin and canvas color extraction in parallel
+  const [visionResult, canvasColors] = await Promise.all([
+    (async (): Promise<{ labels: string[]; text: string[] }> => {
+      try {
+        const base64 = imageDataUrl.replace(/^data:[^;]+;base64,/, "");
+        return await VisionPlugin.analyze({ imageBase64: base64 });
+      } catch {
+        return { labels: [], text: [] };
+      }
+    })(),
+    extractWebColors(imageDataUrl).catch(() => [] as string[]),
+  ]);
+
+  // Merge: Vision object labels first, then canvas color names (deduplicated)
+  const seen = new Set<string>(visionResult.labels);
+  const mergedLabels = [...visionResult.labels];
+  for (const color of canvasColors) {
+    if (!seen.has(color)) {
+      seen.add(color);
+      mergedLabels.push(color);
+    }
   }
+
+  return { labels: mergedLabels, text: visionResult.text };
 }
 
 // ── Web canvas color extraction ───────────────────────────────────────────────
