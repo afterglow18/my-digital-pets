@@ -24,7 +24,6 @@ import {
   WEB_NO_LABELS_VERSION,
   IOS_VISION_VERSION,
 } from "./visionExtractor";
-import { toast } from "@/hooks/use-toast";
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -115,19 +114,10 @@ export async function startVisionIndexer(): Promise<void> {
 
     if (needsIndexing.length === 0) return;
 
-    // Non-blocking toast
-    const { dismiss } = toast({
-      title:       "Preparing photo search…",
-      description: `Indexing ${needsIndexing.length} photo${needsIndexing.length !== 1 ? "s" : ""}`,
-      duration:    60_000,
-    });
-
     for (const item of needsIndexing) {
       try { await analyzeItem(item.id); } catch { /* silent */ }
       await delay(350);
     }
-
-    dismiss();
 
     // Drain any items queued while startup was running
     if (_queue.size > 0) void drainQueue();
