@@ -116,7 +116,7 @@ export default function AccountPage() {
     setExportPending(true);
     try {
       await exportBackup();
-      flash("success", "Backup exported — save it to Files or iCloud Drive.");
+      /* success — no banner needed; file share sheet is confirmation enough */
     } catch (err) {
       flash("error", err instanceof Error ? err.message : "Export failed");
     } finally {
@@ -132,11 +132,7 @@ export default function AccountPage() {
       await qc.invalidateQueries({ queryKey: getListClothingQueryKey() });
       await qc.invalidateQueries({ queryKey: getListOutfitsQueryKey() });
       await qc.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
-      flash(
-        "success",
-        `Restored ${result.clothingAdded} items and ${result.outfitsAdded} outfits.` +
-          (result.skippedItems > 0 ? ` (${result.skippedItems} skipped — already exist.)` : ""),
-      );
+      /* success — wardrobe refreshes automatically; no banner needed */
     } catch (err) {
       flash("error", err instanceof Error ? err.message : "Import failed");
     } finally {
@@ -147,7 +143,7 @@ export default function AccountPage() {
   const handleRestore = async () => {
     try {
       await restore();
-      flash("success", "Purchases restored.");
+      /* success — Current Plan card updates automatically; no banner needed */
     } catch (err) {
       flash("error", err instanceof Error ? err.message : "Could not restore");
     }
