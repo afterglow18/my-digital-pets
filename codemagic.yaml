@@ -61,6 +61,27 @@ workflows:
           npx cap add ios
           npx cap sync ios
 
+      - name: Restrict app to iPhone
+        script: |
+          PROJECT="artifacts/outfit-generator/ios/App/App.xcodeproj/project.pbxproj"
+          python3 - "$PROJECT" <<'PY'
+          import pathlib
+          import sys
+
+          project_path = pathlib.Path(sys.argv[1])
+          contents = project_path.read_text()
+          old = 'TARGETED_DEVICE_FAMILY = "1,2";'
+          new = 'TARGETED_DEVICE_FAMILY = "1";'
+
+          if old not in contents:
+              raise SystemExit(
+                  f"Expected universal device setting was not found in {project_path}"
+              )
+
+          project_path.write_text(contents.replace(old, new))
+          print("Configured App target for iPhone only.")
+          PY
+
       - name: Inject app icon
         script: |
           ICONSET="artifacts/outfit-generator/ios/App/App/Assets.xcassets/AppIcon.appiconset"
