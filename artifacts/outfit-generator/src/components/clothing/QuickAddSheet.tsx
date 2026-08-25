@@ -94,7 +94,8 @@ const CATEGORY_PHOTO_IDEAS: Record<Category, readonly string[]> = {
   toiletries: [
     "Brushes or nail clippers",
     "Shampoo, bathing, or dental products",
-    "Before-and-after grooming photo",
+    "Leash, harness, or walking gear",
+    "Water bottle, travel bowl, or poop bags",
   ],
   essentials: [
     "Adoption papers",
