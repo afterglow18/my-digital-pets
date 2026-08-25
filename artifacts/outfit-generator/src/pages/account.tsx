@@ -297,7 +297,7 @@ export default function AccountPage() {
         {/* ── 3. APP INFO ─────────────────────────────────────────────────── */}
         <Card emoji="🐾" title="My Digital Pets">
           <p className="text-sm text-black/55 leading-snug">
-            Version 1.0.0
+            Version 1.0.1
           </p>
           <p className="text-sm text-black/55 leading-snug">
             Your pets stays on your device, works offline, and can be
