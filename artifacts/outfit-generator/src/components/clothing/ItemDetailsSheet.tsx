@@ -18,6 +18,7 @@ import {
   type ClothingItem,
   type ClothingItemUpdateCategory,
   useCareItemPetSummary,
+  useSetPetCareTodayQuantity,
   useSetPetCareLastLoggedDate,
   useSetPetCareTotal,
   useUpdateClothingItem,
@@ -157,10 +158,12 @@ function localDateString(date = new Date()): string {
 
 function CarePetHistoryRow({
   summary,
+  onIncrementToday,
   onUpdateDate,
   onUpdateTotal,
 }: {
   summary: CarePetSummary;
+  onIncrementToday: (summary: CarePetSummary) => void;
   onUpdateDate: (petId: number, date: string) => void;
   onUpdateTotal: (petId: number, total: number) => void;
 }) {
@@ -213,6 +216,18 @@ function CarePetHistoryRow({
         <p className="font-display font-bold text-sm truncate">{summary.pet.name}</p>
       </div>
       <div className="flex flex-col items-end gap-2 flex-shrink-0">
+        <button
+          type="button"
+          onClick={() => onIncrementToday(summary)}
+          disabled={summary.todayQuantity > 0}
+          className="h-8 px-3 border-2 border-black rounded-lg bg-primary text-xs font-bold uppercase tracking-wider
+                     shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5
+                     active:shadow-none transition-all disabled:cursor-not-allowed disabled:opacity-45
+                     disabled:shadow-none disabled:active:translate-y-0 disabled:active:translate-x-0"
+          aria-label={`Log one use today for ${summary.pet.name}`}
+        >
+          Log Today
+        </button>
         {summary.lastLogged && (
           <label className="flex flex-col items-end gap-1">
             <span className="text-[9px] font-bold uppercase tracking-widest text-black/45">Last logged</span>
@@ -273,6 +288,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
 
   const updateItem  = useUpdateClothingItem();
   const deleteItem  = useDeleteClothingItem();
+  const setCareToday = useSetPetCareTodayQuantity();
   const setCareDate = useSetPetCareLastLoggedDate();
   const setCareTotal = useSetPetCareTotal();
   const queryClient = useQueryClient();
@@ -445,6 +461,22 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getCareItemPetSummaryQueryKey(item.id) });
           queryClient.invalidateQueries({ queryKey: getPetCareSummaryQueryKey(petId) });
+        },
+      },
+    );
+  };
+
+  const handleCareIncrementToday = (summary: CarePetSummary) => {
+    setCareToday.mutate(
+      {
+        petId: summary.pet.id,
+        itemId: item.id,
+        quantity: summary.todayQuantity + 1,
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getCareItemPetSummaryQueryKey(item.id) });
+          queryClient.invalidateQueries({ queryKey: getPetCareSummaryQueryKey(summary.pet.id) });
         },
       },
     );
@@ -659,6 +691,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
                 <CarePetHistoryRow
                   key={summary.pet.id}
                   summary={summary}
+                  onIncrementToday={handleCareIncrementToday}
                   onUpdateDate={handleCareDateUpdate}
                   onUpdateTotal={handleCareTotalUpdate}
                 />

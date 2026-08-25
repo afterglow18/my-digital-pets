@@ -326,6 +326,7 @@ export async function listCareItemPetSummary(itemId: number): Promise<CarePetSum
 
     result.push({
       pet,
+      todayQuantity: logs.find((log) => log.date === localDateString())?.quantity ?? 0,
       total: correction?.total ?? rawTotal,
       lastLogged: datedLogs.at(-1)?.date ?? null,
     });

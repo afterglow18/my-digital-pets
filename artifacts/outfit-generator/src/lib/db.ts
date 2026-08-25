@@ -89,6 +89,7 @@ export interface CareItemSummary {
 
 export interface CarePetSummary {
   pet:           ClothingItem;
+  todayQuantity: number;
   total:         number;
   lastLogged:    string | null;
 }
