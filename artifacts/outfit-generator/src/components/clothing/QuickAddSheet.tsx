@@ -89,6 +89,7 @@ const CATEGORY_PHOTO_IDEAS: Record<Category, readonly string[]> = {
     "Vet paperwork or vaccination card",
     "Medication or supplement packaging",
     "Prescription or treatment instructions",
+    "Food or treat packaging",
   ],
   toiletries: [
     "Grooming supplies",
