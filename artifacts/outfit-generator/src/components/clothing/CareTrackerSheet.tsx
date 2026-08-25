@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { motion } from "framer-motion";
-import { X, Heart, Loader2, AlertCircle, Plus, Minus, Check } from "lucide-react";
+import { X, Heart, Loader2, AlertCircle, Check } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   usePetCareSummary,
@@ -34,11 +34,9 @@ const CATEGORY_ORDER = ["beauty", "toiletries", "essentials", "outfits"];
 function CareRow({
   row,
   onToggle,
-  onAdjust,
 }: {
   row: CareItemSummary;
   onToggle: (row: CareItemSummary, checked: boolean) => void;
-  onAdjust: (row: CareItemSummary, delta: number) => void;
 }) {
   return (
     <div className="flex gap-3 p-3 bg-white border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -73,32 +71,6 @@ function CareRow({
           </div>
         )}
       </div>
-
-      <div className="flex flex-col items-end justify-center gap-1.5 border-l-2 border-black/10 pl-3">
-        <div className="flex items-center gap-1">
-          {row.todayQuantity > 0 ? (
-            <>
-              <button 
-                onClick={() => onAdjust(row, -1)} 
-                className="w-6 h-6 flex items-center justify-center border-2 border-black rounded bg-[#f9f4ee] text-black active:translate-y-px transition-transform"
-                aria-label="Decrease today's quantity"
-              >
-                <Minus className="w-3 h-3" />
-              </button>
-              <span className="text-xs font-bold w-4 text-center">{row.todayQuantity}</span>
-              <button 
-                onClick={() => onAdjust(row, 1)} 
-                className="w-6 h-6 flex items-center justify-center border-2 border-black rounded bg-[#f9f4ee] text-black active:translate-y-px transition-transform"
-                aria-label="Increase today's quantity"
-              >
-                <Plus className="w-3 h-3" />
-              </button>
-            </>
-          ) : (
-            <span className="text-[10px] font-bold uppercase text-black/30 tracking-wider h-6 flex items-center">Today: 0</span>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
@@ -120,15 +92,6 @@ export function CareTrackerSheet({ pet, onClose }: CareTrackerSheetProps) {
 
   const handleToggleToday = useCallback((row: CareItemSummary, checked: boolean) => {
     const newQty = checked ? 1 : 0;
-    setTodayQuantity.mutate({ petId, itemId: row.item.id, quantity: newQty }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getPetCareSummaryQueryKey(petId) });
-      }
-    });
-  }, [petId, setTodayQuantity, queryClient]);
-
-  const handleAdjustToday = useCallback((row: CareItemSummary, delta: number) => {
-    const newQty = Math.max(0, row.todayQuantity + delta);
     setTodayQuantity.mutate({ petId, itemId: row.item.id, quantity: newQty }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getPetCareSummaryQueryKey(petId) });
@@ -224,7 +187,6 @@ export function CareTrackerSheet({ pet, onClose }: CareTrackerSheetProps) {
                   key={row.item.id} 
                   row={row} 
                   onToggle={handleToggleToday} 
-                  onAdjust={handleAdjustToday} 
                 />
               ))}
             </div>
