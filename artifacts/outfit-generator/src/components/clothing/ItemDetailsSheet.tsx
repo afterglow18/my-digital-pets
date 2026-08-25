@@ -48,7 +48,7 @@ const CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: "outfits",    label: "Pet Details" },
   { value: "beauty",     label: "Health" },
   { value: "toiletries", label: "Care" },
-  { value: "essentials", label: "Records" },
+  { value: "essentials", label: "Documents" },
 ];
 
 function Field({

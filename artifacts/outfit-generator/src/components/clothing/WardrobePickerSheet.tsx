@@ -24,7 +24,7 @@ const CATEGORY_LABELS: Record<Category, string> = {
   outfits:    "Pet Details",
   beauty:     "Health",
   toiletries: "Care",
-  essentials: "Records",
+  essentials: "Documents",
 };
 
 interface Props {

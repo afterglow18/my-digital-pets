@@ -46,7 +46,7 @@ const ROWS: { key: RowKey; label: string; btnLabel: string }[] = [
   { key: "outfits",    label: "+ Add Pet Details", btnLabel: "+ ADD PET DETAILS" },
   { key: "beauty",     label: "+ Add Health",      btnLabel: "+ ADD HEALTH"      },
   { key: "toiletries", label: "+ Add Care",        btnLabel: "+ ADD CARE"        },
-  { key: "essentials", label: "+ Add Records",     btnLabel: "+ ADD RECORDS"     },
+  { key: "essentials", label: "+ Add Documents",  btnLabel: "+ ADD DOCUMENTS"  },
 ];
 
 // ── Image constants ───────────────────────────────────────────────────────────

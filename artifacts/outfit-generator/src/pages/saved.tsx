@@ -27,7 +27,7 @@ const SLOT_LABELS: Record<SlotKey, string> = {
   outfits:    "Pet Details",
   beauty:     "Health",
   toiletries: "Care",
-  essentials: "Records",
+  essentials: "Documents",
 };
 
 function ItemPhoto({
@@ -69,7 +69,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   outfits:    "Pet Details",
   beauty:     "Health",
   toiletries: "Care",
-  essentials: "Records",
+  essentials: "Documents",
 };
 
 export default function SavedPage() {
