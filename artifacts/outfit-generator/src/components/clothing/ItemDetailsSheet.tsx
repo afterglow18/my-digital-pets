@@ -18,6 +18,7 @@ import {
   type ClothingItem,
   type ClothingItemUpdateCategory,
   useCareItemPetSummary,
+  useSetPetCareLastLoggedDate,
   useSetPetCareTotal,
   useUpdateClothingItem,
   useDeleteClothingItem,
@@ -25,6 +26,7 @@ import {
   getListOutfitsQueryKey,
   getWardrobeStatsQueryKey,
   getCareItemPetSummaryQueryKey,
+  getPetCareSummaryQueryKey,
 } from "@/hooks/useLocalDB";
 import { useQueryClient } from "@tanstack/react-query";
 import { getImageUrl } from "@/lib/utils";
@@ -146,24 +148,29 @@ function isDirty(form: FormState, item: ClothingItem): boolean {
   );
 }
 
-function formatCareDate(dateStr: string | null): string {
-  if (!dateStr) return "Never";
-  const [year, month, day] = dateStr.split("-").map(Number);
-  return `${month}/${day}/${String(year).slice(-2)}`;
+function localDateString(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function CarePetHistoryRow({
   summary,
+  onUpdateDate,
   onUpdateTotal,
 }: {
   summary: CarePetSummary;
+  onUpdateDate: (petId: number, date: string) => void;
   onUpdateTotal: (petId: number, total: number) => void;
 }) {
   const [totalValue, setTotalValue] = useState(String(summary.total));
+  const [dateValue, setDateValue] = useState(summary.lastLogged ?? "");
 
   useEffect(() => {
     setTotalValue(String(summary.total));
-  }, [summary.total]);
+    setDateValue(summary.lastLogged ?? "");
+  }, [summary.total, summary.lastLogged]);
 
   const commitTotal = () => {
     const parsed = Number.parseInt(totalValue, 10);
@@ -171,6 +178,20 @@ function CarePetHistoryRow({
       onUpdateTotal(summary.pet.id, parsed);
     } else {
       setTotalValue(String(summary.total));
+    }
+  };
+
+  const commitDate = () => {
+    if (!summary.lastLogged) return;
+
+    const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(dateValue);
+    if (!isValidDate || dateValue > localDateString()) {
+      setDateValue(summary.lastLogged);
+      return;
+    }
+
+    if (dateValue !== summary.lastLogged) {
+      onUpdateDate(summary.pet.id, dateValue);
     }
   };
 
@@ -190,28 +211,43 @@ function CarePetHistoryRow({
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-display font-bold text-sm truncate">{summary.pet.name}</p>
-        {summary.lastLogged && (
-          <p className="text-[10px] font-bold uppercase tracking-widest text-black/45 mt-1">
-            Last logged: {formatCareDate(summary.lastLogged)}
-          </p>
-        )}
       </div>
-      <label className="flex flex-col items-end gap-1 flex-shrink-0">
-        <span className="text-[9px] font-bold uppercase tracking-widest text-black/45">Times logged</span>
-        <input
-          type="number"
-          min={0}
-          value={totalValue}
-          onChange={(event) => setTotalValue(event.target.value)}
-          onBlur={commitTotal}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") event.currentTarget.blur();
-          }}
-          aria-label={`Times logged for ${summary.pet.name}`}
-          className="w-14 h-8 border-2 border-black rounded-lg bg-[#f9f4ee] text-sm font-bold text-center
-                     focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary"
-        />
-      </label>
+      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+        {summary.lastLogged && (
+          <label className="flex flex-col items-end gap-1">
+            <span className="text-[9px] font-bold uppercase tracking-widest text-black/45">Last logged</span>
+            <input
+              type="date"
+              max={localDateString()}
+              value={dateValue}
+              onChange={(event) => setDateValue(event.target.value)}
+              onBlur={commitDate}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") event.currentTarget.blur();
+              }}
+              aria-label={`Last logged date for ${summary.pet.name}`}
+              className="w-[8.5rem] h-8 border-2 border-black rounded-lg bg-[#f9f4ee] px-1.5
+                         text-xs font-bold text-center focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary"
+            />
+          </label>
+        )}
+        <label className="flex flex-col items-end gap-1">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-black/45">Times logged</span>
+          <input
+            type="number"
+            min={0}
+            value={totalValue}
+            onChange={(event) => setTotalValue(event.target.value)}
+            onBlur={commitTotal}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") event.currentTarget.blur();
+            }}
+            aria-label={`Times logged for ${summary.pet.name}`}
+            className="w-14 h-8 border-2 border-black rounded-lg bg-[#f9f4ee] text-sm font-bold text-center
+                       focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary"
+          />
+        </label>
+      </div>
     </div>
   );
 }
@@ -237,6 +273,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
 
   const updateItem  = useUpdateClothingItem();
   const deleteItem  = useDeleteClothingItem();
+  const setCareDate = useSetPetCareLastLoggedDate();
   const setCareTotal = useSetPetCareTotal();
   const queryClient = useQueryClient();
   const carePetSummaryQuery = useCareItemPetSummary(item?.id ?? 0, {
@@ -396,6 +433,18 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getCareItemPetSummaryQueryKey(item.id) });
           queryClient.invalidateQueries({ queryKey: ["pet-care"] });
+        },
+      },
+    );
+  };
+
+  const handleCareDateUpdate = (petId: number, date: string) => {
+    setCareDate.mutate(
+      { petId, itemId: item.id, date },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getCareItemPetSummaryQueryKey(item.id) });
+          queryClient.invalidateQueries({ queryKey: getPetCareSummaryQueryKey(petId) });
         },
       },
     );
@@ -610,6 +659,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
                 <CarePetHistoryRow
                   key={summary.pet.id}
                   summary={summary}
+                  onUpdateDate={handleCareDateUpdate}
                   onUpdateTotal={handleCareTotalUpdate}
                 />
               ))}

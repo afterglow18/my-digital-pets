@@ -25,6 +25,7 @@ import {
   listPetCareSummary,
   listCareItemPetSummary,
   setPetCareTodayQuantity,
+  setPetCareLastLoggedDate,
   setPetCareTotal,
 } from "@/lib/localDB";
 
@@ -232,6 +233,13 @@ export function useSetPetCareTodayQuantity() {
   return useMutation<void, Error, { petId: number; itemId: number; quantity: number }>({
     mutationFn: ({ petId, itemId, quantity }) =>
       setPetCareTodayQuantity(petId, itemId, quantity),
+  });
+}
+
+export function useSetPetCareLastLoggedDate() {
+  return useMutation<void, Error, { petId: number; itemId: number; date: string }>({
+    mutationFn: ({ petId, itemId, date }) =>
+      setPetCareLastLoggedDate(petId, itemId, date),
   });
 }
 

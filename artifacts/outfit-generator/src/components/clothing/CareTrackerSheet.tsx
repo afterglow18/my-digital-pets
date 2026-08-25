@@ -13,8 +13,7 @@ import { getImageUrl } from "@/lib/utils";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function formatWalkDate(dateStr: string | null): string {
-  if (!dateStr) return "Never";
+function formatWalkDate(dateStr: string): string {
   const parts = dateStr.split("-");
   if (parts.length !== 3) return dateStr;
   const [y, m, d] = parts.map(Number);
@@ -68,9 +67,11 @@ function CareRow({
 
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <div className="font-bold text-sm truncate leading-tight">{row.item.name}</div>
-        <div className="text-[10px] uppercase tracking-widest text-black/50 mt-1 truncate">
-          Last Logged: {formatWalkDate(row.lastLogged)}
-        </div>
+        {row.lastLogged && (
+          <div className="text-[10px] uppercase tracking-widest text-black/50 mt-1 truncate">
+            Last Logged: {formatWalkDate(row.lastLogged)}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col items-end justify-center gap-1.5 border-l-2 border-black/10 pl-3">
@@ -96,16 +97,6 @@ function CareRow({
           ) : (
             <span className="text-[10px] font-bold uppercase text-black/30 tracking-wider h-6 flex items-center">Today: 0</span>
           )}
-        </div>
-        
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-black/40">Times</span>
-          <span
-            className="w-12 h-6 border-2 border-black rounded bg-[#f9f4ee] text-xs font-bold text-center flex items-center justify-center"
-            aria-label={`Total times logged for ${row.item.name}`}
-          >
-            {row.total}
-          </span>
         </div>
       </div>
     </div>

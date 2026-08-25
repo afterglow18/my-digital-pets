@@ -371,6 +371,61 @@ export async function setPetCareTodayQuantity(
   }
 }
 
+export async function setPetCareLastLoggedDate(
+  petId: number,
+  itemId: number,
+  date: string,
+): Promise<void> {
+  if (!petId || !itemId) throw new Error("A pet and care item are required");
+
+  const nextDate = date.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(nextDate)) {
+    throw new Error("Enter a valid care date");
+  }
+
+  const [year, month, day] = nextDate.split("-").map(Number);
+  const parsedDate = new Date(year, month - 1, day);
+  if (
+    parsedDate.getFullYear() !== year ||
+    parsedDate.getMonth() !== month - 1 ||
+    parsedDate.getDate() !== day ||
+    nextDate > localDateString()
+  ) {
+    throw new Error("Care dates cannot be in the future");
+  }
+
+  const db = await getDB();
+  const logs = await getCareLogs(petId, itemId);
+  const datedLogs = logs
+    .filter((log) => log.quantity > 0)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const latestLog = datedLogs.at(-1);
+
+  if (!latestLog) throw new Error("No care log found for this pet and item");
+  if (latestLog.date === nextDate) return;
+
+  const existingTarget = logs.find((log) => log.date === nextDate);
+  const now = new Date().toISOString();
+  const tx = db.transaction("care_logs", "readwrite");
+
+  if (existingTarget) {
+    await tx.store.put({
+      ...existingTarget,
+      quantity: Math.max(0, existingTarget.quantity) + latestLog.quantity,
+      updatedAt: now,
+    } satisfies StoredCareLog);
+  } else {
+    await tx.store.put({
+      ...latestLog,
+      date: nextDate,
+      updatedAt: now,
+    } satisfies StoredCareLog);
+  }
+
+  await tx.store.delete([petId, itemId, latestLog.date]);
+  await tx.done;
+}
+
 export async function setPetCareTotal(
   petId: number,
   itemId: number,
