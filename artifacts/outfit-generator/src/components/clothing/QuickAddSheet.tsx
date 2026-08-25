@@ -86,10 +86,10 @@ const CATEGORY_PHOTO_IDEAS: Record<Category, readonly string[]> = {
     "Collar, tag, leash, or favorite toy",
   ],
   beauty: [
-    "Vet paperwork or vaccination card",
-    "Medication or supplement packaging",
-    "Prescription or treatment instructions",
+    "Medications or supplements",
     "Food or treat packaging",
+    "Shampoo, flea/tick, or medicated care products",
+    "Dental care or wellness products",
   ],
   toiletries: [
     "Grooming supplies",
