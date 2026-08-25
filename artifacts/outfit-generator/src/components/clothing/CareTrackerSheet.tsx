@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import { motion } from "framer-motion";
 import { X, Heart, Loader2, AlertCircle, Plus, Minus, Check } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   usePetCareSummary,
   useSetPetCareTodayQuantity,
-  useSetPetCareTotal,
   getPetCareSummaryQueryKey,
   type ClothingItem,
   type CareItemSummary
@@ -33,48 +32,14 @@ const CATEGORY_ORDER = ["beauty", "toiletries", "essentials", "outfits"];
 
 // ── Components ────────────────────────────────────────────────────────────────
 
-function TotalEditor({ row, onUpdate }: { row: CareItemSummary; onUpdate: (val: number) => void }) {
-  const [val, setVal] = useState(row.total.toString());
-  
-  useEffect(() => {
-    setVal(row.total.toString());
-  }, [row.total]);
-  
-  return (
-    <input 
-      type="number" 
-      min="0"
-      className="w-12 h-6 border-2 border-black rounded bg-[#f9f4ee] text-xs font-bold text-center focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary transition-colors appearance-none"
-      value={val}
-      onChange={e => setVal(e.target.value)}
-      onBlur={() => {
-        const num = parseInt(val, 10);
-        if (!isNaN(num) && num >= 0 && num !== row.total) {
-          onUpdate(num);
-        } else {
-          setVal(row.total.toString());
-        }
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.currentTarget.blur();
-        }
-      }}
-      aria-label={`Total times logged for ${row.item.name}`}
-    />
-  );
-}
-
 function CareRow({
   row,
   onToggle,
   onAdjust,
-  onUpdateTotal
 }: {
   row: CareItemSummary;
   onToggle: (row: CareItemSummary, checked: boolean) => void;
   onAdjust: (row: CareItemSummary, delta: number) => void;
-  onUpdateTotal: (row: CareItemSummary, val: number) => void;
 }) {
   return (
     <div className="flex gap-3 p-3 bg-white border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -135,7 +100,12 @@ function CareRow({
         
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-black/40">Times</span>
-          <TotalEditor row={row} onUpdate={val => onUpdateTotal(row, val)} />
+          <span
+            className="w-12 h-6 border-2 border-black rounded bg-[#f9f4ee] text-xs font-bold text-center flex items-center justify-center"
+            aria-label={`Total times logged for ${row.item.name}`}
+          >
+            {row.total}
+          </span>
         </div>
       </div>
     </div>
@@ -156,7 +126,6 @@ export function CareTrackerSheet({ pet, onClose }: CareTrackerSheetProps) {
   });
 
   const setTodayQuantity = useSetPetCareTodayQuantity();
-  const setTotal = useSetPetCareTotal();
 
   const handleToggleToday = useCallback((row: CareItemSummary, checked: boolean) => {
     const newQty = checked ? 1 : 0;
@@ -175,14 +144,6 @@ export function CareTrackerSheet({ pet, onClose }: CareTrackerSheetProps) {
       }
     });
   }, [petId, setTodayQuantity, queryClient]);
-
-  const handleUpdateTotal = useCallback((row: CareItemSummary, newTotal: number) => {
-    setTotal.mutate({ petId, itemId: row.item.id, total: newTotal }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getPetCareSummaryQueryKey(petId) });
-      }
-    });
-  }, [petId, setTotal, queryClient]);
 
   if (!pet) return null;
 
@@ -273,7 +234,6 @@ export function CareTrackerSheet({ pet, onClose }: CareTrackerSheetProps) {
                   row={row} 
                   onToggle={handleToggleToday} 
                   onAdjust={handleAdjustToday} 
-                  onUpdateTotal={handleUpdateTotal} 
                 />
               ))}
             </div>
