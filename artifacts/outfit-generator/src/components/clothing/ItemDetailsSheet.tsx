@@ -190,9 +190,11 @@ function CarePetHistoryRow({
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-display font-bold text-sm truncate">{summary.pet.name}</p>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-black/45 mt-1">
-          Last logged: {formatCareDate(summary.lastLogged)}
-        </p>
+        {summary.lastLogged && (
+          <p className="text-[10px] font-bold uppercase tracking-widest text-black/45 mt-1">
+            Last logged: {formatCareDate(summary.lastLogged)}
+          </p>
+        )}
       </div>
       <label className="flex flex-col items-end gap-1 flex-shrink-0">
         <span className="text-[9px] font-bold uppercase tracking-widest text-black/45">Times logged</span>
