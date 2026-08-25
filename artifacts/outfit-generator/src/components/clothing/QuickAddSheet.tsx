@@ -96,6 +96,7 @@ const CATEGORY_PHOTO_IDEAS: Record<Category, readonly string[]> = {
     "Shampoo, bathing, or dental products",
     "Leash, harness, or walking gear",
     "Water bottle, travel bowl, or poop bags",
+    "Litter, litter box, scoop, or liners",
   ],
   essentials: [
     "Adoption papers",
