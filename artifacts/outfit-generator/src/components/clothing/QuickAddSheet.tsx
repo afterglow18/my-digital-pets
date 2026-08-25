@@ -92,8 +92,8 @@ const CATEGORY_PHOTO_IDEAS: Record<Category, readonly string[]> = {
     "Dental care or wellness products",
   ],
   toiletries: [
-    "Grooming supplies",
-    "Shampoo, brush, nail, or dental products",
+    "Brushes or nail clippers",
+    "Shampoo, bathing, or dental products",
     "Before-and-after grooming photo",
   ],
   essentials: [
