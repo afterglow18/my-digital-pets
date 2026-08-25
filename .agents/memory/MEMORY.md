@@ -4,3 +4,4 @@
 - [Auth system](auth-system.md) — JWT/bcrypt auth, no-fallback-secret rule, ownership-before-delete pattern, single useAuth instance via context.
 - [RevenueCat seed client](revenuecat-seed-client.md) — RC connector proxy client pattern; baseUrl must be /v2; keys set as VITE_ shared env vars.
 - [Per-pet care history](per-pet-care-history.md) — shared supplies must keep totals and dated usage isolated by the selected pet.
+- [iOS release versioning](ios-versioning.md) — set the native marketing version in Codemagic after Capacitor syncs the generated project.

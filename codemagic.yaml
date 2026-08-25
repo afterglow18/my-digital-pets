@@ -26,6 +26,7 @@ workflows:
         XCODE_WORKSPACE: artifacts/outfit-generator/ios/App/App.xcodeproj/project.xcworkspace
         COREPACK_ENABLE_STRICT: "0"
         BUNDLE_ID: com.mydigitalpets.app
+        APP_VERSION: 1.0.1
         TEAM_ID: 2A78MFVCJS
         PROFILE_NAME: My Digital Pets AppStore
         APP_STORE_CONNECT_KEY_IDENTIFIER: V936CR85XU
@@ -123,6 +124,7 @@ workflows:
       - name: Set build number and encryption declaration
         script: |
           cd artifacts/outfit-generator/ios/App
+          agvtool new-marketing-version "$APP_VERSION"
           agvtool new-version -all $BUILD_NUMBER
           # Declare no non-exempt encryption so TestFlight never asks
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" App/Info.plist 2>/dev/null || \
