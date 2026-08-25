@@ -14,33 +14,22 @@ import { removeBackground } from "@/lib/backgroundRemoval";
 import { BgCompareSheet } from "./BgCompareSheet";
 import { LookbookPickerSheet } from "./LookbookPickerSheet";
 import {
+  type CarePetSummary,
   type ClothingItem,
   type ClothingItemUpdateCategory,
+  useCareItemPetSummary,
+  useSetPetCareTotal,
   useUpdateClothingItem,
   useDeleteClothingItem,
   getListClothingQueryKey,
   getListOutfitsQueryKey,
   getWardrobeStatsQueryKey,
+  getCareItemPetSummaryQueryKey,
 } from "@/hooks/useLocalDB";
 import { useQueryClient } from "@tanstack/react-query";
 import { getImageUrl } from "@/lib/utils";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-/** Returns today's date as a "YYYY-MM-DD" local string (no UTC offset issues). */
-function todayStr(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-/** Formats "YYYY-MM-DD" → "M/D/YY" for display. */
-function formatWalkDate(dateStr: string): string {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  return `${m}/${d}/${String(y).slice(-2)}`;
-}
 
 const LIFE_STAGE_OPTIONS = ["", "Puppy / Kitten", "Junior", "Adult", "Senior", "All Ages"];
 const TYPE_OPTIONS       = ["", "Routine", "Preventive", "Emergency", "Grooming", "Training", "Surgery"];
@@ -115,6 +104,8 @@ interface ItemDetailsSheetProps {
   /** When true: show "Add to Lookbook" button (search/favorites context).
    *  When false (default): show "Clean Up Photo" button (wardrobe context). */
   showAddToLookbook?: boolean;
+  /** Opens the care tracker for this Pet Details photo. */
+  onLogCare?: (pet: ClothingItem) => void;
 }
 
 interface FormState {
@@ -155,14 +146,77 @@ function isDirty(form: FormState, item: ClothingItem): boolean {
   );
 }
 
-export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook = false }: ItemDetailsSheetProps) {
+function formatCareDate(dateStr: string | null): string {
+  if (!dateStr) return "Never";
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return `${month}/${day}/${String(year).slice(-2)}`;
+}
+
+function CarePetHistoryRow({
+  summary,
+  onUpdateTotal,
+}: {
+  summary: CarePetSummary;
+  onUpdateTotal: (petId: number, total: number) => void;
+}) {
+  const [totalValue, setTotalValue] = useState(String(summary.total));
+
+  useEffect(() => {
+    setTotalValue(String(summary.total));
+  }, [summary.total]);
+
+  const commitTotal = () => {
+    const parsed = Number.parseInt(totalValue, 10);
+    if (Number.isInteger(parsed) && parsed >= 0) {
+      onUpdateTotal(summary.pet.id, parsed);
+    } else {
+      setTotalValue(String(summary.total));
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3 border-2 border-black rounded-xl bg-white px-3 py-2.5
+                    shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+      <div className="w-10 h-10 flex-shrink-0 overflow-hidden rounded-lg border-2 border-black bg-[#f9f4ee]">
+        {summary.pet.imageObjectPath ? (
+          <img
+            src={getImageUrl(summary.pet.imageObjectPath) ?? undefined}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-black/30 text-xs">—</div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-display font-bold text-sm truncate">{summary.pet.name}</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-black/45 mt-1">
+          Last logged: {formatCareDate(summary.lastLogged)}
+        </p>
+      </div>
+      <label className="flex flex-col items-end gap-1 flex-shrink-0">
+        <span className="text-[9px] font-bold uppercase tracking-widest text-black/45">Times logged</span>
+        <input
+          type="number"
+          min={0}
+          value={totalValue}
+          onChange={(event) => setTotalValue(event.target.value)}
+          onBlur={commitTotal}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") event.currentTarget.blur();
+          }}
+          aria-label={`Times logged for ${summary.pet.name}`}
+          className="w-14 h-8 border-2 border-black rounded-lg bg-[#f9f4ee] text-sm font-bold text-center
+                     focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary"
+        />
+      </label>
+    </div>
+  );
+}
+
+export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook = false, onLogCare }: ItemDetailsSheetProps) {
   const [form,             setForm]             = useState<FormState | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  // ── Walk tracking state ────────────────────────────────────────────────────
-  const [localTimesWalked,    setLocalTimesWalked]    = useState(0);
-  const [localLastWalkedDate, setLocalLastWalkedDate] = useState<string | null>(null);
-  const [prevLastWalkedDate,  setPrevLastWalkedDate]  = useState<string | null>(null);
 
   // ── Optimistic image state ─────────────────────────────────────────────────
   // Updated immediately on confirm so the photo never flashes back to the old
@@ -181,16 +235,19 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
 
   const updateItem  = useUpdateClothingItem();
   const deleteItem  = useDeleteClothingItem();
+  const setCareTotal = useSetPetCareTotal();
   const queryClient = useQueryClient();
+  const carePetSummaryQuery = useCareItemPetSummary(item?.id ?? 0, {
+    query: {
+      enabled: item?.category === "beauty" || item?.category === "toiletries",
+    },
+  });
 
   // Reset everything whenever the item changes
   useEffect(() => {
     if (item) {
       setForm(toForm(item));
       setDisplayImageUrl(item.imageObjectPath ?? null);
-      setLocalTimesWalked(item.timesWorn ?? 0);
-      setLocalLastWalkedDate(item.lastWalkedDate ?? null);
-      setPrevLastWalkedDate(null);
     }
     setShowDeleteConfirm(false);
     setCompareOpen(false);
@@ -274,43 +331,10 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
   if (!item || !form) return null;
 
   const dirty = isDirty(form, item);
+  const isCareItem = item.category === "beauty" || item.category === "toiletries";
 
   // Disable once background removal has been confirmed on this item.
   const isAlreadyCleaned = item.bgRemoved === true;
-
-  // ── Walk tracking ─────────────────────────────────────────────────────────
-  // Compare against today at render time — no timers; auto-resets at midnight.
-  const today = todayStr();
-  const walkedToday = localLastWalkedDate === today;
-
-  const saveWalkFields = (timesWalked: number, lastDate: string | null) => {
-    updateItem.mutate(
-      { id: item.id, data: { timesWorn: timesWalked, lastWalkedDate: lastDate } },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
-          queryClient.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
-        },
-      },
-    );
-  };
-
-  const handleWalkToday = () => {
-    const newCount = localTimesWalked + 1;
-    setPrevLastWalkedDate(localLastWalkedDate);
-    setLocalTimesWalked(newCount);
-    setLocalLastWalkedDate(today);
-    saveWalkFields(newCount, today);
-  };
-
-  const handleUndoWalk = () => {
-    const newCount = Math.max(0, localTimesWalked - 1);
-    const restored = prevLastWalkedDate;
-    setLocalTimesWalked(newCount);
-    setLocalLastWalkedDate(restored);
-    setPrevLastWalkedDate(null);
-    saveWalkFields(newCount, restored);
-  };
 
   const patch = (key: keyof FormState) => (value: string | boolean) =>
     setForm((prev) => prev ? { ...prev, [key]: value } : prev);
@@ -358,6 +382,18 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
           queryClient.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
           onDeleted?.();
           onClose();
+        },
+      },
+    );
+  };
+
+  const handleCareTotalUpdate = (petId: number, total: number) => {
+    setCareTotal.mutate(
+      { petId, itemId: item.id, total },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getCareItemPetSummaryQueryKey(item.id) });
+          queryClient.invalidateQueries({ queryKey: ["pet-care"] });
         },
       },
     );
@@ -446,7 +482,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
           </div>
         )}
 
-        {/* ── Photo actions + Walk Today (always visible) ── */}
+        {/* ── Photo actions ── */}
         <div className="px-4 py-2 border-b-2 border-black flex gap-2 flex-shrink-0">
           {/* Add to Lookbook (search/favorites context) OR Clean Up Photo (wardrobe context) */}
           {showAddToLookbook ? (
@@ -481,28 +517,16 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
             )
           )}
 
-          {/* Walked Today / Logged ✓ · Undo */}
-          {walkedToday ? (
+          {/* Only Pet Details photos identify the pet whose care is being logged. */}
+          {item.category === "outfits" && onLogCare && (
             <button
-              onClick={handleUndoWalk}
+              onClick={() => onLogCare(item)}
               className={`${shownImageUrl && !isAlreadyCleaned ? "flex-1" : "w-full"} flex items-center justify-center gap-2 py-2.5 rounded-xl
-                         border-2 border-[#556040] bg-[#7a8c65] text-[#f5f0e8]
-                         font-display font-bold text-sm uppercase tracking-tight
-                         shadow-[3px_3px_0px_0px_#4a5535]
-                         active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all`}
-            >
-              ✓ Logged · Undo
-            </button>
-          ) : (
-            <button
-              onClick={handleWalkToday}
-              className={`${shownImageUrl && !isAlreadyCleaned ? "flex-1" : "w-full"} flex items-center justify-center gap-2 py-2.5 rounded-xl
-                         border-2 border-black bg-white
-                         font-display font-bold text-sm uppercase tracking-tight
+                         border-2 border-black bg-primary font-display font-bold text-sm uppercase tracking-tight
                          shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
                          active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all`}
             >
-              🐾 Pet Care Today
+              Log Care
             </button>
           )}
         </div>
@@ -549,47 +573,46 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <SelectField
-              label="Category"
-              value={form.category}
-              onChange={patch("category") as (v: string) => void}
-              options={CATEGORY_OPTIONS}
-            />
-            {/* Times Walked — editable; also updated by the Walk Today button */}
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-black/40">
-                Times Cared
-              </label>
-              <input
-                type="number"
-                min={0}
-                value={localTimesWalked}
-                onChange={(e) => {
-                  const val = e.target.value === "" ? 0 : Math.max(0, parseInt(e.target.value) || 0);
-                  setLocalTimesWalked(val);
-                }}
-                onBlur={() => {
-                  updateItem.mutate(
-                    { id: item.id, data: { timesWorn: localTimesWalked } },
-                    {
-                      onSuccess: () => {
-                        queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
-                        queryClient.invalidateQueries({ queryKey: getWardrobeStatsQueryKey() });
-                      },
-                    },
-                  );
-                }}
-                className="w-full border-2 border-black rounded-lg px-3 py-2 text-sm font-medium
-                           bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              {localLastWalkedDate && (
-                <span className="text-[11px] text-black/40 font-medium">
-                  Last cared: {formatWalkDate(localLastWalkedDate)}
-                </span>
+          <SelectField
+            label="Category"
+            value={form.category}
+            onChange={patch("category") as (v: string) => void}
+            options={CATEGORY_OPTIONS}
+          />
+
+          {isCareItem && (
+            <section className="flex flex-col gap-3 pt-1" aria-labelledby="care-history-heading">
+              <div>
+                <h3 id="care-history-heading" className="font-display font-bold text-base uppercase tracking-tight">
+                  Care history by pet
+                </h3>
+                <p className="text-xs text-black/50 mt-1">
+                  Usage stays separate for each pet who uses this item.
+                </p>
+              </div>
+
+              {carePetSummaryQuery.isLoading && (
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40 py-3">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading pet history…
+                </div>
               )}
-            </div>
-          </div>
+
+              {!carePetSummaryQuery.isLoading && carePetSummaryQuery.data?.length === 0 && (
+                <p className="text-xs text-black/45 border-2 border-dashed border-black/20 rounded-xl p-3">
+                  Add a Pet Details photo to see pet-specific history here.
+                </p>
+              )}
+
+              {!carePetSummaryQuery.isLoading && carePetSummaryQuery.data?.map((summary) => (
+                <CarePetHistoryRow
+                  key={summary.pet.id}
+                  summary={summary}
+                  onUpdateTotal={handleCareTotalUpdate}
+                />
+              ))}
+            </section>
+          )}
 
         </div>
 

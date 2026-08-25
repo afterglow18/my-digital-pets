@@ -5,17 +5,19 @@
  * IndexedDB is natively available in both environments and persists to the
  * app's sandboxed storage on-device.
  *
- * Schema v1:
+ * Schema v3:
  *   clothing_items  — wardrobe items with embedded image data URLs
  *   saved_outfits   — named outfit collections
  *   outfit_items    — junction: outfit ↔ clothing item
  *   settings        — key/value store for app preferences
+ *   care_logs       — dated quantity entries for pet ↔ care item usage
+ *   care_totals     — optional per-pet/item total corrections
  */
 
 import { openDB, type IDBPDatabase } from "idb";
 
 export const DB_NAME    = "my-digital-pets";
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 // ── Stored types (IndexedDB records) ─────────────────────────────────────────
 
@@ -60,6 +62,35 @@ export interface StoredOutfitItem {
 export interface StoredSetting {
   key:   string;
   value: string;
+}
+
+export interface StoredCareLog {
+  petId:       number;
+  itemId:      number;
+  date:        string; // local "YYYY-MM-DD"
+  quantity:    number;
+  createdAt:   string;
+  updatedAt:   string;
+}
+
+export interface StoredCareTotal {
+  petId:       number;
+  itemId:      number;
+  total:       number;
+  updatedAt:   string;
+}
+
+export interface CareItemSummary {
+  item:          ClothingItem;
+  todayQuantity: number;
+  total:         number;
+  lastLogged:    string | null;
+}
+
+export interface CarePetSummary {
+  pet:           ClothingItem;
+  total:         number;
+  lastLogged:    string | null;
 }
 
 // ── Public types (consumed by hooks and pages) ────────────────────────────────
@@ -116,6 +147,25 @@ export async function getDB(): Promise<IDBPDatabase> {
       // settings
       if (!db.objectStoreNames.contains("settings")) {
         db.createObjectStore("settings", { keyPath: "key" });
+      }
+
+      // care_logs — one row per pet, item, and local calendar day
+      if (!db.objectStoreNames.contains("care_logs")) {
+        const store = db.createObjectStore("care_logs", {
+          keyPath: ["petId", "itemId", "date"],
+        });
+        store.createIndex("by_pet", ["petId"]);
+        store.createIndex("by_item", ["itemId"]);
+        store.createIndex("by_pet_item", ["petId", "itemId"]);
+      }
+
+      // care_totals — only present when a user manually corrects a total
+      if (!db.objectStoreNames.contains("care_totals")) {
+        const store = db.createObjectStore("care_totals", {
+          keyPath: ["petId", "itemId"],
+        });
+        store.createIndex("by_pet", ["petId"]);
+        store.createIndex("by_item", ["itemId"]);
       }
     },
 

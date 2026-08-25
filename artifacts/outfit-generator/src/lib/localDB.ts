@@ -5,7 +5,18 @@
  * React Query hooks in useLocalDB.ts call these functions and handle caching.
  */
 
-import { getDB, type ClothingItem, type SavedOutfit, type StoredClothingItem, type StoredOutfit, type StoredOutfitItem } from "./db";
+import {
+  getDB,
+  type CarePetSummary,
+  type CareItemSummary,
+  type ClothingItem,
+  type SavedOutfit,
+  type StoredCareLog,
+  type StoredCareTotal,
+  type StoredClothingItem,
+  type StoredOutfit,
+  type StoredOutfitItem,
+} from "./db";
 
 const CATEGORIES = ["outfits", "beauty", "toiletries", "essentials"] as const;
 
@@ -99,6 +110,21 @@ export async function deleteClothingItem(id: number): Promise<void> {
     if (link.id != null) await tx.store.delete(link.id);
   }
   await tx.done;
+
+  // Remove care history and corrections for this item.
+  const careLogs = await db.getAllFromIndex("care_logs", "by_item", id) as StoredCareLog[];
+  const careLogTx = db.transaction("care_logs", "readwrite");
+  for (const log of careLogs) {
+    await careLogTx.store.delete([log.petId, log.itemId, log.date]);
+  }
+  await careLogTx.done;
+
+  const careTotals = await db.getAllFromIndex("care_totals", "by_item", id) as StoredCareTotal[];
+  const careTotalTx = db.transaction("care_totals", "readwrite");
+  for (const total of careTotals) {
+    await careTotalTx.store.delete([total.petId, total.itemId]);
+  }
+  await careTotalTx.done;
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -236,4 +262,135 @@ export async function getSetting(key: string): Promise<string | null> {
 export async function setSetting(key: string, value: string): Promise<void> {
   const db = await getDB();
   await db.put("settings", { key, value });
+}
+
+// ── Per-pet care tracking ─────────────────────────────────────────────────────
+
+const CARE_CATEGORIES = ["beauty", "toiletries"] as const;
+
+function localDateString(date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+export async function listCareItems(): Promise<ClothingItem[]> {
+  const all = await listClothing();
+  return all.filter((item) =>
+    CARE_CATEGORIES.includes(item.category as (typeof CARE_CATEGORIES)[number]) &&
+    item.name.trim().length > 0
+  );
+}
+
+async function getCareLogs(petId: number, itemId: number): Promise<StoredCareLog[]> {
+  const db = await getDB();
+  return await db.getAllFromIndex("care_logs", "by_pet_item", [petId, itemId]) as StoredCareLog[];
+}
+
+export async function listPetCareSummary(petId: number): Promise<CareItemSummary[]> {
+  if (!petId) return [];
+  const db = await getDB();
+  const items = await listCareItems();
+  const result: CareItemSummary[] = [];
+
+  for (const item of items) {
+    const logs = await getCareLogs(petId, item.id);
+    const correction = await db.get("care_totals", [petId, item.id]) as StoredCareTotal | undefined;
+    const rawTotal = logs.reduce((sum, log) => sum + Math.max(0, log.quantity), 0);
+    const datedLogs = logs.filter((log) => log.quantity > 0).sort((a, b) => a.date.localeCompare(b.date));
+    result.push({
+      item,
+      todayQuantity: logs.find((log) => log.date === localDateString())?.quantity ?? 0,
+      total: correction?.total ?? rawTotal,
+      lastLogged: datedLogs.at(-1)?.date ?? null,
+    });
+  }
+
+  return result;
+}
+
+export async function listCareItemPetSummary(itemId: number): Promise<CarePetSummary[]> {
+  if (!itemId) return [];
+  const db = await getDB();
+  const pets = await listClothing("outfits");
+  const result: CarePetSummary[] = [];
+
+  for (const pet of pets) {
+    const logs = await getCareLogs(pet.id, itemId);
+    const correction = await db.get("care_totals", [pet.id, itemId]) as StoredCareTotal | undefined;
+    const rawTotal = logs.reduce((sum, log) => sum + Math.max(0, log.quantity), 0);
+    const datedLogs = logs
+      .filter((log) => log.quantity > 0)
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    result.push({
+      pet,
+      total: correction?.total ?? rawTotal,
+      lastLogged: datedLogs.at(-1)?.date ?? null,
+    });
+  }
+
+  return result;
+}
+
+export async function setPetCareTodayQuantity(
+  petId: number,
+  itemId: number,
+  quantity: number,
+): Promise<void> {
+  if (!petId || !itemId) throw new Error("A pet and care item are required");
+  const db = await getDB();
+  const date = localDateString();
+  const nextQuantity = Math.max(0, Math.floor(quantity));
+  const existing = await db.get("care_logs", [petId, itemId, date]) as StoredCareLog | undefined;
+  const previousQuantity = existing?.quantity ?? 0;
+  const now = new Date().toISOString();
+
+  if (nextQuantity === 0) {
+    if (existing) await db.delete("care_logs", [petId, itemId, date]);
+  } else {
+    await db.put("care_logs", {
+      petId,
+      itemId,
+      date,
+      quantity: nextQuantity,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+    } satisfies StoredCareLog);
+  }
+
+  // Preserve a manual correction while applying today's usage delta.
+  const correction = await db.get("care_totals", [petId, itemId]) as StoredCareTotal | undefined;
+  if (correction && previousQuantity !== nextQuantity) {
+    await db.put("care_totals", {
+      ...correction,
+      total: Math.max(0, correction.total + nextQuantity - previousQuantity),
+      updatedAt: now,
+    } satisfies StoredCareTotal);
+  }
+}
+
+export async function setPetCareTotal(
+  petId: number,
+  itemId: number,
+  total: number,
+): Promise<void> {
+  if (!petId || !itemId) throw new Error("A pet and care item are required");
+  const db = await getDB();
+  const nextTotal = Math.max(0, Math.floor(total));
+  const logs = await getCareLogs(petId, itemId);
+  const rawTotal = logs.reduce((sum, log) => sum + Math.max(0, log.quantity), 0);
+  const key: [number, number] = [petId, itemId];
+
+  if (nextTotal === rawTotal) {
+    await db.delete("care_totals", key);
+  } else {
+    await db.put("care_totals", {
+      petId,
+      itemId,
+      total: nextTotal,
+      updatedAt: new Date().toISOString(),
+    } satisfies StoredCareTotal);
+  }
 }

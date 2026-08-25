@@ -21,10 +21,15 @@ import {
   deleteOutfit,
   addItemToOutfit,
   removeItemFromOutfit,
+  listCareItems,
+  listPetCareSummary,
+  listCareItemPetSummary,
+  setPetCareTodayQuantity,
+  setPetCareTotal,
 } from "@/lib/localDB";
 
-export type { ClothingItem, SavedOutfit } from "@/lib/db";
-import type { ClothingItem, SavedOutfit } from "@/lib/db";
+export type { CareItemSummary, CarePetSummary, ClothingItem, SavedOutfit } from "@/lib/db";
+import type { CareItemSummary, CarePetSummary, ClothingItem, SavedOutfit } from "@/lib/db";
 
 // ── Query keys ────────────────────────────────────────────────────────────────
 
@@ -44,6 +49,18 @@ export function getWardrobeStatsQueryKey() {
 
 export function getGetClothingItemQueryKey(id: number) {
   return ["clothing", id];
+}
+
+export function getListCareItemsQueryKey() {
+  return ["care-items"];
+}
+
+export function getPetCareSummaryQueryKey(petId: number) {
+  return ["pet-care", petId];
+}
+
+export function getCareItemPetSummaryQueryKey(itemId: number) {
+  return ["care-item-pets", itemId];
 }
 
 // ── Clothing hooks ────────────────────────────────────────────────────────────
@@ -171,6 +188,56 @@ export function useAddItemToOutfit() {
 export function useRemoveItemFromOutfit() {
   return useMutation<void, Error, { id: number; itemId: number }>({
     mutationFn: ({ id, itemId }) => removeItemFromOutfit(id, itemId),
+  });
+}
+
+// ── Per-pet care hooks ─────────────────────────────────────────────────────────
+
+export function useListCareItems(
+  options?: { query?: { enabled?: boolean; queryKey?: unknown[] } },
+) {
+  return useQuery<ClothingItem[], Error>({
+    queryKey: options?.query?.queryKey ?? getListCareItemsQueryKey(),
+    queryFn: listCareItems,
+    staleTime: 0,
+    enabled: options?.query?.enabled !== false,
+  });
+}
+
+export function usePetCareSummary(
+  petId: number,
+  options?: { query?: { enabled?: boolean; queryKey?: unknown[] } },
+) {
+  return useQuery<CareItemSummary[], Error>({
+    queryKey: options?.query?.queryKey ?? getPetCareSummaryQueryKey(petId),
+    queryFn: () => listPetCareSummary(petId),
+    staleTime: 0,
+    enabled: (options?.query?.enabled !== false) && petId > 0,
+  });
+}
+
+export function useCareItemPetSummary(
+  itemId: number,
+  options?: { query?: { enabled?: boolean; queryKey?: unknown[] } },
+) {
+  return useQuery<CarePetSummary[], Error>({
+    queryKey: options?.query?.queryKey ?? getCareItemPetSummaryQueryKey(itemId),
+    queryFn: () => listCareItemPetSummary(itemId),
+    staleTime: 0,
+    enabled: (options?.query?.enabled !== false) && itemId > 0,
+  });
+}
+
+export function useSetPetCareTodayQuantity() {
+  return useMutation<void, Error, { petId: number; itemId: number; quantity: number }>({
+    mutationFn: ({ petId, itemId, quantity }) =>
+      setPetCareTodayQuantity(petId, itemId, quantity),
+  });
+}
+
+export function useSetPetCareTotal() {
+  return useMutation<void, Error, { petId: number; itemId: number; total: number }>({
+    mutationFn: ({ petId, itemId, total }) => setPetCareTotal(petId, itemId, total),
   });
 }
 

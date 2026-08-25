@@ -33,6 +33,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ClosetRow, ClosetRowHandle } from "@/components/ClosetRow";
 import { QuickAddSheet } from "@/components/clothing/QuickAddSheet";
 import { ItemDetailsSheet } from "@/components/clothing/ItemDetailsSheet";
+import { CareTrackerSheet } from "@/components/clothing/CareTrackerSheet";
 import { UpgradeSheet, UpgradeReason } from "@/components/paywall/UpgradeSheet";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEntitlements } from "@/hooks/useEntitlements";
@@ -129,6 +130,7 @@ export default function WardrobePage() {
   const [centred,       setCentred]       = useState<Partial<Record<RowKey, ClothingItem>>>({});
   const [addCategory,   setAddCategory]   = useState<Category | null>(null);
   const [detailsItem,   setDetailsItem]   = useState<ClothingItem | null>(null);
+  const [carePet,       setCarePet]       = useState<ClothingItem | null>(null);
   const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
   const [isSaveOpen,    setIsSaveOpen]    = useState(false);
   const [saveName,      setSaveName]      = useState("");
@@ -524,6 +526,19 @@ export default function WardrobePage() {
             key={detailsItem.id}
             item={detailsItem}
             onClose={() => setDetailsItem(null)}
+            onLogCare={(pet) => {
+              setDetailsItem(null);
+              setCarePet(pet);
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {carePet && (
+          <CareTrackerSheet
+            key={carePet.id}
+            pet={carePet}
+            onClose={() => setCarePet(null)}
           />
         )}
       </AnimatePresence>
